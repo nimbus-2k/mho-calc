@@ -11,9 +11,10 @@ type HeroSectionProps = {
     setCombatState: React.Dispatch<React.SetStateAction<boolean>>;
     finalStats: Record<string, number>;
     setInfoModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    setNotesModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export default function HeroSection({ selectedHero, setSelectedHero, heroLevel, setHeroLevel, setHeroAttributes, setCombatState, finalStats, setInfoModalOpen }: HeroSectionProps) {
+export default function HeroSection({ selectedHero, setSelectedHero, heroLevel, setHeroLevel, setHeroAttributes, setCombatState, finalStats, setInfoModalOpen, setNotesModalOpen }: HeroSectionProps) {
     const hero = heroes.find((h) => h.name === selectedHero);
     const procCombat = (state: boolean) => {
         setCombatState(state);
@@ -218,7 +219,7 @@ export default function HeroSection({ selectedHero, setSelectedHero, heroLevel, 
             </div>
 
             {/* Info Button */}
-            <div className="w-full flex justify-center mb-4">
+            <div className="w-full flex justify-center mb-4 gap-4">
                 <button
                     onClick={() => setInfoModalOpen(true)}
                     title="Info"
@@ -226,6 +227,18 @@ export default function HeroSection({ selectedHero, setSelectedHero, heroLevel, 
                 >
                     <svg className="w-4 h-4 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                         <path fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm9.408-5.5a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2h-.01ZM10 10a1 1 0 1 0 0 2h1v3h-1a1 1 0 1 0 0 2h4a1 1 0 1 0 0-2h-1v-4a1 1 0 0 0-1-1h-2Z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+                <button
+                    onClick={() => setNotesModalOpen(true)}
+                    title="Notes"
+                    className="px-3 py-1 mt-4 bg-blue-700 hover:bg-blue-800 text-white text-xs font-semibold rounded shadow-lg focus:outline-none cursor-pointer"
+                >
+                    <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="2" y="3" width="12" height="11" rx="1.5" fill="none" stroke="currentColor" stroke-width="1" />
+                        <line x1="2" y1="5" x2="14" y2="5" stroke="currentColor" stroke-width="1" />
+                        <line x1="4" y1="8" x2="12" y2="8" stroke="currentColor" stroke-width="1" />
+                        <line x1="4" y1="11" x2="10" y2="11" stroke="currentColor" stroke-width="1" />
                     </svg>
                 </button>
             </div>
