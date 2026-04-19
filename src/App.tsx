@@ -1,5 +1,5 @@
 import "./App.css";
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { type Item, conditionLabels } from "./data/stats";
 import { type Hero, heroes } from "./data/heroes";
 import { calculateItemTotals, calculateFinalStats } from "./utils/statCalculate";
@@ -9,9 +9,26 @@ import ItemsSection from "./sections/ItemsSection.tsx";
 import InfinitySection from "./sections/InfinitySection.tsx";
 import DamageSection from "./sections/DamageSection.tsx";
 import SynergySection from "./sections/SynergySection.tsx";
+import ModifierSection from "./sections/ModifierSection.tsx";
+
+const MODIFIER_SLOT1_PRIMARY = ["Physical", "Energy", "Mental"] as const;
+
+function slot1LegendDefaultsForHero(heroName: string): Record<(typeof MODIFIER_SLOT1_PRIMARY)[number], boolean> {
+    const hero = heroes.find((h) => h.name === heroName);
+    const slot1Lower = new Set(MODIFIER_SLOT1_PRIMARY.map((t) => t.toLowerCase()));
+    const raw = hero?.damageType ?? [];
+    const included = new Set(
+        raw.map((t) => t.trim().toLowerCase()).filter((t) => slot1Lower.has(t))
+    );
+    const out = {} as Record<(typeof MODIFIER_SLOT1_PRIMARY)[number], boolean>;
+    for (const t of MODIFIER_SLOT1_PRIMARY) {
+        out[t] = included.size > 0 ? included.has(t.toLowerCase()) : true;
+    }
+    return out;
+}
 
 export default function App() {
-    const [activeTab, setActiveTab] = useState<"items" | "infinity" | "synergy" | "damage">("items");
+    const [activeTab, setActiveTab] = useState<"items" | "infinity" | "synergy" | "damage" | "modifiers">("items");
     const [infoModalOpen, setInfoModalOpen] = useState(false);
     const [notesModalOpen, setNotesModalOpen] = useState(false);
     // Hero Section
@@ -50,6 +67,32 @@ export default function App() {
         Array(conditionLabels.length).fill(false)
     );
     const [vuln, setVuln] = useState<number>(0);
+    
+    // Modifier Section 
+    const [modifierChartTypeEnabled, setModifierChartTypeEnabled] = useState<Record<string, boolean>>({});
+
+    const handleUserSelectHeroForModifiers = useCallback((heroName: string) => {
+        setModifierChartTypeEnabled((prev) => ({
+            ...prev,
+            ...slot1LegendDefaultsForHero(heroName),
+        }));
+    }, []);
+
+    // Fill missing primary-type keys when hero changes from load/init (does not override saved toggles).
+    useEffect(() => {
+        setModifierChartTypeEnabled((prev) => {
+            const defs = slot1LegendDefaultsForHero(selectedHero);
+            let changed = false;
+            const next = { ...prev };
+            for (const t of MODIFIER_SLOT1_PRIMARY) {
+                if (next[t] === undefined) {
+                    next[t] = defs[t];
+                    changed = true;
+                }
+            }
+            return changed ? next : prev;
+        });
+    }, [selectedHero]);
 
     // Toast notification
     const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: "", visible: false });
@@ -155,6 +198,7 @@ export default function App() {
             damageCalculators,
             globalCheckedConditions,
             vuln,
+            modifierChartTypeEnabled,
         };
 
         try {
@@ -214,7 +258,15 @@ export default function App() {
             }
             if (parsedState.globalCheckedConditions) setGlobalCheckedConditions(parsedState.globalCheckedConditions);
             if (parsedState.vuln !== undefined) setVuln(parsedState.vuln);
-
+            if (parsedState.modifierChartTypeEnabled != null && typeof parsedState.modifierChartTypeEnabled === "object") {
+                const raw = { ...(parsedState.modifierChartTypeEnabled as Record<string, boolean>) };
+                const heroName = (parsedState.selectedHero as string) || "Angela";
+                const defs = slot1LegendDefaultsForHero(heroName);
+                for (const t of MODIFIER_SLOT1_PRIMARY) {
+                    if (raw[t] === undefined) raw[t] = defs[t];
+                }
+                setModifierChartTypeEnabled(raw);
+            }
             console.log("State loaded successfully.");
             showToast("Loaded");
         } catch (error) {
@@ -239,6 +291,7 @@ export default function App() {
         damageCalculators,
         globalCheckedConditions,
         vuln,
+        modifierChartTypeEnabled,
     });
 
     const applyLoadedState = (parsedState: any) => {
@@ -277,6 +330,15 @@ export default function App() {
         }
         if (parsedState.globalCheckedConditions) setGlobalCheckedConditions(parsedState.globalCheckedConditions);
         if (parsedState.vuln !== undefined) setVuln(parsedState.vuln);
+        if (parsedState.modifierChartTypeEnabled != null && typeof parsedState.modifierChartTypeEnabled === "object") {
+            const raw = { ...(parsedState.modifierChartTypeEnabled as Record<string, boolean>) };
+            const heroName = (parsedState.selectedHero as string) || "Angela";
+            const defs = slot1LegendDefaultsForHero(heroName);
+            for (const t of MODIFIER_SLOT1_PRIMARY) {
+                if (raw[t] === undefined) raw[t] = defs[t];
+            }
+            setModifierChartTypeEnabled(raw);
+        }
     };
 
     const exportStateToFile = () => {
@@ -420,6 +482,7 @@ export default function App() {
                         {/* Hero */}
                         <HeroSection
                             selectedHero={selectedHero} setSelectedHero={setSelectedHero}
+                            onUserSelectHero={handleUserSelectHeroForModifiers}
                             heroLevel={heroLevel} setHeroLevel={setHeroLevel}
                             setCombatState={setCombatState}
                             setHeroAttributes={setHeroAttributes}
@@ -451,6 +514,12 @@ export default function App() {
                                         className={`px-4 py-2 transition-colors duration-200 rounded-lg font-semibold text-base cursor-pointer ${activeTab === "synergy" ? "bg-blue-700/90 text-white shadow-md" : "text-sky-200 hover:bg-blue-800/50 hover:text-white"}`}
                                     >
                                         Synergy
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveTab("modifiers")}
+                                        className={`px-4 py-2 transition-colors duration-200 rounded-lg font-semibold text-base cursor-pointer ${activeTab === "modifiers" ? "bg-blue-700/90 text-white shadow-md" : "text-sky-200 hover:bg-blue-800/50 hover:text-white"}`}
+                                    >
+                                        Modifiers
                                     </button>
                                     <button
                                         onClick={() => setActiveTab("damage")}
@@ -499,6 +568,14 @@ export default function App() {
                                         setVuln={setVuln}
                                     />
                                 )}
+                                {activeTab === "modifiers" && (
+                                    <ModifierSection
+                                        selectedHero={selectedHero}
+                                        finalStats={finalStats}
+                                        chartTypeEnabled={modifierChartTypeEnabled}
+                                        onChartTypeEnabledChange={setModifierChartTypeEnabled}
+                                    />
+                                )}
                             </div>
                         </section>
 
@@ -513,6 +590,7 @@ export default function App() {
                         <div className="mb-6">
                             <HeroSection
                                 selectedHero={selectedHero} setSelectedHero={setSelectedHero}
+                                onUserSelectHero={handleUserSelectHeroForModifiers}
                                 heroLevel={heroLevel} setHeroLevel={setHeroLevel}
                                 setCombatState={setCombatState}
                                 setHeroAttributes={setHeroAttributes}

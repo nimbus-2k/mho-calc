@@ -105,8 +105,8 @@ export function calculateFinalStats(
     hero.spirit1.type == "scale"
       ? 2.576 * heroLevel + 100.242
       : hero.spirit1.type == "colossus"
-      ? 11.5 * heroLevel + 40
-      : hero.spirit1.value;
+        ? 11.5 * heroLevel + 40
+        : hero.spirit1.value;
   const synergySpirit = synergy["Spirit"] ?? 0;
   const infinitySpirit = infinity["Spirit"] ?? 0;
   const maxSpirit =
@@ -117,8 +117,8 @@ export function calculateFinalStats(
     hero.spirit2.name == "Diamond Armor"
       ? diamondArmor(heroLevel)
       : hero.spirit2.name == "Combat Shield"
-      ? 1 + heroLevel * 35
-      : hero.spirit2.value;
+        ? 1 + heroLevel * 35
+        : hero.spirit2.value;
   finalStats["Spirit2"] = baseSpirit2;
 
   const infinityBonusResourceCost = infinity["Resource Cost"] ?? 0;
@@ -158,7 +158,7 @@ export function calculateFinalStats(
     baseMoveSpeed *
     (1 +
       (infinityMoveSpeed + synergyMoveSpeed + (itemTotals["Move Speed"] ?? 0)) /
-        100);
+      100);
   finalStats["Move Speed"] = totalMoveSpeed;
 
   // Medkit Cooldown
@@ -178,12 +178,12 @@ export function calculateFinalStats(
     baseDmg =
       archetype1 && archetype1list[archetype1]
         ? ((attributes[archetype1list[archetype1][0]] ??
-            hero?.attributes[archetype1list[archetype1][0]] ??
-            0) +
-            (attributes[archetype1list[archetype1][1]] ??
-              hero?.attributes[archetype1list[archetype1][1]] ??
-              0)) *
-          4
+          hero?.attributes[archetype1list[archetype1][0]] ??
+          0) +
+          (attributes[archetype1list[archetype1][1]] ??
+            hero?.attributes[archetype1list[archetype1][1]] ??
+            0)) *
+        4
         : 0;
   }
 
@@ -201,8 +201,8 @@ export function calculateFinalStats(
     startingBaseDmg =
       archetype1 && archetype1list[archetype1]
         ? ((heroAttributes[archetype1list[archetype1][0]] ?? 0) +
-            (heroAttributes[archetype1list[archetype1][1]] ?? 0)) *
-          4
+          (heroAttributes[archetype1list[archetype1][1]] ?? 0)) *
+        4
         : 0;
   }
 
@@ -238,14 +238,7 @@ export function calculateFinalStats(
     finalStats[totalKey] = finalVal;
   }
 
-  const dmgTypes2 = [
-    "Melee",
-    "Ranged",
-    "Summon",
-    "Area",
-    "Movement",
-    "Signature",
-  ];
+  const dmgTypes2 = ["Melee", "Ranged"];
 
   for (const type2 of dmgTypes2) {
     const ratingKey = `${type2} DMG Rating`;
@@ -262,6 +255,29 @@ export function calculateFinalStats(
     finalStats[totalKey] = finalVal;
   }
 
+  const dmgTypes3 = [
+    "Summon",
+    "Area",
+    "Movement",
+    "Signature",
+  ];
+
+  for (const type3 of dmgTypes3) {
+    const ratingKey = `${type3} DMG Rating`;
+    const addKey = `${type3} Base DMG%`;
+    const totalKey = `Total ${type3} DMG%`;
+
+    const dmgRatingVal = itemTotals[ratingKey] ?? 0;
+    finalStats[ratingKey] = dmgRatingVal;
+
+    const addVal = (itemTotals[addKey] ?? 0) + (synergy[addKey] ?? 0);
+    finalStats[addKey] = addVal;
+
+    const finalVal = dmgRatingVal / 40 + addVal;
+    finalStats[totalKey] = finalVal;
+  }
+
+  // Power Duration & Radius
   finalStats["Power Duration"] = itemTotals["Power Duration"] ?? 0;
   finalStats["Power Radius"] = itemTotals["Power Radius"] ?? 0;
 
@@ -367,6 +383,19 @@ export function calculateFinalStats(
     );
   }
 
+  for (const type of dmgTypes3) {
+    calculateTypeCritHit(
+      type,
+      itemTotals,
+      synergy,
+      finalStats,
+      heroLevel,
+      critHitMulti,
+      critHitRating,
+      plusCritHit
+    );
+  }
+
   // Crit DMG
   const critDmgRating1 = itemTotals["Crit DMG Rating"] ?? 0;
   const critDmgRating2 = int * heroLevel;
@@ -424,8 +453,8 @@ export function calculateFinalStats(
   const trait3HealthRegenMedkit =
     trait3 === "Health Regen. On Medkit"
       ? 12 +
-        35 * Math.floor((heroLevel - 1) / 3) +
-        [0, 11, 23][(heroLevel - 1) % 3]
+      35 * Math.floor((heroLevel - 1) / 3) +
+      [0, 11, 23][(heroLevel - 1) % 3]
       : 0;
   finalStats["Health Regen."] =
     (itemTotals["Health Regen."] ?? 0) +
@@ -576,8 +605,8 @@ export function calculateFinalStats(
       ((itemTotals["DMG Reduction% (+)"] ?? 0) +
         (0.4 * defenseMultiplied) / (defenseMultiplied + 200 * heroLevel)) +
       ((((0.2 * totalDeflect) / 100 / +0.4) * totalDodge) / 100) *
-        (1 - (0.5 * totalDeflect) / 100) *
-        (1 - totalDodge / 100));
+      (1 - (0.5 * totalDeflect) / 100) *
+      (1 - totalDodge / 100));
 
   // ===== -DMG from =====
   // Deflected
@@ -649,7 +678,7 @@ function diamondArmor(level: number) {
       3.578387347844458e-2) *
       level +
       23.56164734519495) *
-      level +
+    level +
     79.73714428573214
   );
 }
