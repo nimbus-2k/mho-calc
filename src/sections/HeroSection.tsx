@@ -5,6 +5,7 @@ import { heroes, archetype1list, archetype2list, combatType } from "../data/hero
 type HeroSectionProps = {
     selectedHero: string;
     setSelectedHero: React.Dispatch<React.SetStateAction<string>>;
+    onUserSelectHero?: (heroName: string) => void;
     heroLevel: number;
     setHeroLevel: React.Dispatch<React.SetStateAction<number>>;
     setHeroAttributes: React.Dispatch<React.SetStateAction<Record<string, number>>>;
@@ -14,7 +15,7 @@ type HeroSectionProps = {
     setNotesModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export default function HeroSection({ selectedHero, setSelectedHero, heroLevel, setHeroLevel, setHeroAttributes, setCombatState, finalStats, setInfoModalOpen, setNotesModalOpen }: HeroSectionProps) {
+export default function HeroSection({ selectedHero, setSelectedHero, onUserSelectHero, heroLevel, setHeroLevel, setHeroAttributes, setCombatState, finalStats, setInfoModalOpen, setNotesModalOpen }: HeroSectionProps) {
     const hero = heroes.find((h) => h.name === selectedHero);
     const procCombat = (state: boolean) => {
         setCombatState(state);
@@ -61,7 +62,11 @@ export default function HeroSection({ selectedHero, setSelectedHero, heroLevel, 
                         <div className="flex flex-col items-center sm:items-start">
                             <select
                                 value={selectedHero}
-                                onChange={(e) => setSelectedHero(e.target.value)}
+                                onChange={(e) => {
+                                    const name = e.target.value;
+                                    setSelectedHero(name);
+                                    onUserSelectHero?.(name);
+                                }}
                                 className="bg-gray-800 p-1 px-2 mb-4 rounded text-white text-sm font-medium cursor-pointer"
                             >
                                 {heroes.map((hero) => (
