@@ -20,7 +20,6 @@ type ModifierSectionProps = {
     onChartTypeEnabledChange: Dispatch<SetStateAction<Record<string, boolean>>>;
 };
 
-// --- Slot configs ---
 const SLOT1 = ["Physical", "Energy", "Mental"] as const;
 const SLOT2 = ["Melee", "Ranged"] as const;
 const SLOT3 = ["Area", "Movement", "Signature"];
@@ -34,6 +33,7 @@ const ALL_TYPES = [
 ];
 
 const COLORS: Record<string, string> = {
+    Base: "#6F6F6F",
     Physical: "#D4537E",
     Energy: "#378ADD",
     Mental: "#7F77DD",
@@ -66,7 +66,6 @@ export default function ModifierSection({
 }: ModifierSectionProps) {
     const slot3Combos = useMemo(() => allSubsets(SLOT3), []);
 
-    /** Primary damage types enabled for this hero — always follows `damageType` in heroes data. */
     const slot1IncludedFromHero = useMemo(() => {
         const slot1Lower = new Set(SLOT1.map((t) => t.toLowerCase()));
         const raw = heroes.find((h) => h.name === selectedHero)?.damageType ?? [];
@@ -75,7 +74,6 @@ export default function ModifierSection({
         );
     }, [selectedHero]);
 
-    /** Primary layers: follow `chartTypeEnabled` (user override); missing keys fall back to hero `damageType`. */
     const isPrimaryLayerVisible = useCallback(
         (type: string) => {
             if (!isSlot1Type(type)) return chartTypeEnabled[type] !== false;
@@ -143,7 +141,6 @@ export default function ModifierSection({
         return Array.from(used);
     }, [allCombos, chartTypeEnabled, finalStats, slot1IncludedFromHero]);
 
-    // Default missing non-primary legend keys to visible (primary keys come from App / save / hero dropdown).
     useEffect(() => {
         if (usedTypes.length === 0) return;
         onChartTypeEnabledChange((prev) => {
@@ -172,22 +169,22 @@ export default function ModifierSection({
         });
     }, [allCombos, finalStats]);
 
-    // Further filter to exclude combos containing any SLOT1 type with zero value
     const displayedCombos = useMemo(() => {
         return validCombos.filter((combo) => {
-            const containsDisabledSlot1Type = SLOT1.some(
-                (type) => combo.types.includes(type) && !isPrimaryLayerVisible(type)
+            const containsHiddenType = combo.types.some((type) =>
+                isSlot1Type(type)
+                    ? !isPrimaryLayerVisible(type)
+                    : chartTypeEnabled[type] === false
             );
-            if (containsDisabledSlot1Type) return false;
+            if (containsHiddenType) return false;
 
-            // Check if any SLOT1 type in this combo has zero value
             const slot1TypesInCombo = combo.types.filter(t => SLOT1.includes(t as any));
             return !slot1TypesInCombo.some(t => {
                 const val = finalStats[`Total ${t} DMG%`] ?? 0;
                 return val <= 0;
             });
         });
-    }, [isPrimaryLayerVisible, validCombos, finalStats]);
+    }, [chartTypeEnabled, isPrimaryLayerVisible, validCombos, finalStats]);
 
     const handleLegendClick = useCallback((_e: unknown, legendItem: { text?: string }) => {
         const type = legendItem?.text;
@@ -202,19 +199,31 @@ export default function ModifierSection({
     const chartData = useMemo(
         () => ({
             labels: displayedCombos.map((c) => c.label),
-            datasets: usedTypes.map((type) => ({
-                label: type,
-                data: displayedCombos.map((c) => {
-                    const value = finalStats[`Total ${type} DMG%`] ?? 0;
+            datasets: [
+                {
+                    label: "Base",
+                    data: displayedCombos.map(() => {
+                        const baseValue = finalStats["Base DMG"] ?? 0;
+                        return baseValue > 0 ? parseFloat(baseValue.toFixed(2)) : null;
+                    }),
+                    backgroundColor: COLORS.Base,
+                    hidden: chartTypeEnabled["Base"] === false,
+                    borderWidth: 0,
+                },
+                ...usedTypes.map((type) => ({
+                    label: type,
+                    data: displayedCombos.map((c) => {
+                        const value = finalStats[`Total ${type} DMG%`] ?? 0;
 
-                    if (!c.types.includes(type)) return null;
+                        if (!c.types.includes(type)) return null;
 
-                    return value > 0 ? parseFloat((value).toFixed(2)) : null;
-                }),
-                backgroundColor: COLORS[type] ?? "#888780",
-                hidden: !isPrimaryLayerVisible(type),
-                borderWidth: 0,
-            })),
+                        return value > 0 ? parseFloat((value).toFixed(2)) : null;
+                    }),
+                    backgroundColor: COLORS[type] ?? "#888780",
+                    hidden: !isPrimaryLayerVisible(type),
+                    borderWidth: 0,
+                })),
+            ],
         }),
         [chartTypeEnabled, displayedCombos, finalStats, isPrimaryLayerVisible, usedTypes]
     );
@@ -272,7 +281,7 @@ export default function ModifierSection({
                                         const total = combo.types.reduce((sum, type) => {
                                             const value = finalStats[`Total ${type} DMG%`] ?? 0;
                                             return sum + (value > 0 ? value : 0);
-                                        }, 0);
+                                        }, finalStats["Base DMG"] ?? 0);
 
                                         return `Total: ${total.toFixed(2)}%`;
                                     },
