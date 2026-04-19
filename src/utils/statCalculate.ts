@@ -287,7 +287,9 @@ export function calculateFinalStats(
     (synergy["DMG vs Normals/Elites"] ?? 0);
   finalStats["DMG vs Champions"] = (itemTotals["Champions"] ?? 0) / 40;
   finalStats["DMG vs Bosses"] =
-    (synergy["DMG vs Bosses"] ?? 0) + (itemTotals["Bosses"] ?? 0) / 40;
+    (itemTotals["Bosses (Rating)"] ?? 0) / 40 +
+    (itemTotals["Bosses (%)"] ?? 0) +
+    (synergy["DMG vs Bosses"] ?? 0);
   finalStats["DMG vs Targeting You"] =
     (synergy["DMG vs Enemies Targeting You"] ?? 0) +
     (itemTotals["Targeting You"] ?? 0) / 40;
