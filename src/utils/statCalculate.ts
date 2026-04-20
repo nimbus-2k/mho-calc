@@ -339,6 +339,14 @@ export function calculateFinalStats(
   finalStats["DMG vs Danger Room Status"] =
     (itemTotals["Danger Room Status"] ?? 0) / 40;
 
+  // Hero-specific keyword Bonus DMG
+  for (const keyword of hero.keywords) {
+    if (!keyword) continue;
+    const bonusKey = `${keyword} Bonus DMG%`;
+    const legacyBaseKey = `${keyword} Base DMG%`;
+    finalStats[bonusKey] = (itemTotals[bonusKey] ?? 0) + (itemTotals[legacyBaseKey] ?? 0);
+  }
+
   // ===== Crit =====
   // Crit Hit
   const critHitRating = itemTotals["Crit Hit Rating"] ?? 0;

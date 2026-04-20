@@ -43,6 +43,7 @@ export interface Hero {
   };
   damageType: string[];
   keywords: string[];
+  bonusDmgKeywords: string[];
 }
 
 // Attributes: base lvl 60
@@ -91,6 +92,7 @@ export const heroes: Hero[] = [
     },
     damageType: ["Physical"],
     keywords: ["Sword", "Axe", "Ribbon"],
+    bonusDmgKeywords: ["Sword", "Ribbon"],
   },
   {
     name: "Ant-Man",
@@ -120,6 +122,7 @@ export const heroes: Hero[] = [
     },
     damageType: ["Physical"],
     keywords: ["Ant", "Shrink"],
+    bonusDmgKeywords: ["Ant", "Shrink"],
   },
   {
     name: "Beast",
@@ -149,6 +152,7 @@ export const heroes: Hero[] = [
     },
     damageType: ["Energy", "Physical"],
     keywords: ["Brain", "Brawn"],
+    bonusDmgKeywords: [],
   },
   {
     name: "Black Bolt",
@@ -178,6 +182,7 @@ export const heroes: Hero[] = [
     },
     damageType: ["Energy", "Physical"],
     keywords: [],
+    bonusDmgKeywords: [],
   },
   {
     name: "Black Cat",
@@ -207,6 +212,7 @@ export const heroes: Hero[] = [
     },
     damageType: ["Physical"],
     keywords: ["Claw", "Trap", "Whip"],
+    bonusDmgKeywords: ["Trap"],
   },
   {
     name: "Black Panther",
@@ -236,6 +242,7 @@ export const heroes: Hero[] = [
     },
     damageType: ["Energy", "Physical"],
     keywords: [],
+    bonusDmgKeywords: [],
   },
   {
     name: "Black Widow",
@@ -265,6 +272,7 @@ export const heroes: Hero[] = [
     },
     damageType: ["Energy", "Physical"],
     keywords: [],
+    bonusDmgKeywords: [],
   },
   {
     name: "Blade",
@@ -291,9 +299,10 @@ export const heroes: Hero[] = [
       name: "Thirst",
       value: 100,
       type: "flat",
-    }, 
+    },
     damageType: ["Physical"],
     keywords: [],
+    bonusDmgKeywords: [],
   },
   {
     name: "Cable",
@@ -320,9 +329,10 @@ export const heroes: Hero[] = [
       name: "",
       value: 0,
       type: "flat",
-    }, 
+    },
     damageType: ["Energy", "Mental"],
     keywords: ["Psimitar", "Psion", "Arsenal"],
+    bonusDmgKeywords: ["Psimitar", "Psion", "Arsenal"],
   },
   {
     name: "Captain America",
@@ -349,9 +359,10 @@ export const heroes: Hero[] = [
       name: "Serum",
       value: 10,
       type: "flat",
-    }, 
+    },
     damageType: ["Physical"],
     keywords: ["Serum"],
+    bonusDmgKeywords: ["Serum"],
   },
   {
     name: "Captain Marvel",
@@ -378,9 +389,10 @@ export const heroes: Hero[] = [
       name: "",
       value: 0,
       type: "flat",
-    }, 
+    },
     damageType: ["Energy", "Physical"],
     keywords: [],
+    bonusDmgKeywords: [],
   },
   {
     name: "Carnage",
@@ -407,9 +419,10 @@ export const heroes: Hero[] = [
       name: "Adrenaline Rush",
       value: 50,
       type: "flat",
-    }, 
+    },
     damageType: ["Physical"],
     keywords: ["Claw", "Axe", "Knife", "Mace"],
+    bonusDmgKeywords: ["Claw", "Axe", "Knife", "Mace"],
   },
   {
     name: "Colossus",
@@ -436,9 +449,10 @@ export const heroes: Hero[] = [
       name: "",
       value: 0,
       type: "flat",
-    }, 
+    },
     damageType: ["Physical"],
     keywords: ["Call-In"],
+    bonusDmgKeywords: [],
   },
   {
     name: "Cyclops",
@@ -465,9 +479,10 @@ export const heroes: Hero[] = [
       name: "",
       value: 0,
       type: "flat",
-    }, 
+    },
     damageType: ["Energy", "Physical"],
     keywords: ["Optic"],
+    bonusDmgKeywords: ["Optic"],
   },
   {
     name: "Daredevil",
@@ -494,9 +509,10 @@ export const heroes: Hero[] = [
       name: "Combo Points",
       value: 5,
       type: "flat",
-    }, 
+    },
     damageType: ["Physical"],
     keywords: ["Opener", "Finisher"],
+    bonusDmgKeywords: ["Opener", "Finisher"],
   },
   {
     name: "Deadpool",
@@ -524,9 +540,10 @@ export const heroes: Hero[] = [
       name: "Stacks",
       value: 37284,
       type: "flat",
-    }, 
+    },
     damageType: ["Physical"],
     keywords: [],
+    bonusDmgKeywords: [],
   },
   {
     name: "Doctor Doom",
@@ -553,9 +570,10 @@ export const heroes: Hero[] = [
       name: "Power",
       value: 500,
       type: "flat",
-    }, 
+    },
     damageType: ["Energy", "Mental", "Physical"],
     keywords: ["Tech", "Sorcery"],
+    bonusDmgKeywords: [],
   },
   {
     name: "Doctor Strange",
@@ -585,6 +603,7 @@ export const heroes: Hero[] = [
     },
     damageType: ["Mental"],
     keywords: ["Incantation"],
+    bonusDmgKeywords: ["Incantation"],
   },
   {
     name: "Elektra",
@@ -611,9 +630,10 @@ export const heroes: Hero[] = [
       name: "",
       value: 0,
       type: "flat",
-    }, 
+    },
     damageType: ["Physical"],
     keywords: [],
+    bonusDmgKeywords: [],
   },
   {
     name: "Emma Frost",
@@ -641,9 +661,10 @@ export const heroes: Hero[] = [
       name: "Diamond Armor",
       value: 103,
       type: "scale",
-    }, 
+    },
     damageType: ["Mental", "Physical"],
     keywords: ["Diamond"],
+    bonusDmgKeywords: [],
   },
   {
     name: "Gambit",
@@ -670,9 +691,10 @@ export const heroes: Hero[] = [
       name: "",
       value: 0,
       type: "flat",
-    }, 
+    },
     damageType: ["Energy", "Physical"],
     keywords: [],
+    bonusDmgKeywords: [],
   },
   {
     name: "Ghost Rider",
@@ -699,9 +721,10 @@ export const heroes: Hero[] = [
       name: "",
       value: 0,
       type: "flat",
-    }, 
+    },
     damageType: ["Mental", "Physical"],
     keywords: ["Chain"],
+    bonusDmgKeywords: [],
   },
   {
     name: "Green Goblin",
@@ -728,9 +751,10 @@ export const heroes: Hero[] = [
       name: "",
       value: 0,
       type: "flat",
-    }, 
+    },
     damageType: ["Energy", "Physical"],
     keywords: [],
+    bonusDmgKeywords: [],
   },
   {
     name: "Hawkeye",
@@ -757,9 +781,10 @@ export const heroes: Hero[] = [
       name: "Trick Arrowhead",
       value: 3,
       type: "flat",
-    }, 
+    },
     damageType: ["Physical"],
     keywords: ["Trick Arrow", "Non-Trick Arrow"],
+    bonusDmgKeywords: [],
   },
   {
     name: "Hulk",
@@ -787,9 +812,10 @@ export const heroes: Hero[] = [
       name: "",
       value: 0,
       type: "flat",
-    }, 
+    },
     damageType: ["Physical"],
     keywords: [],
+    bonusDmgKeywords: [],
   },
   {
     name: "Human Torch",
@@ -817,9 +843,10 @@ export const heroes: Hero[] = [
       name: "",
       value: 0,
       type: "flat",
-    }, 
+    },
     damageType: ["Energy"],
     keywords: [],
+    bonusDmgKeywords: [],
   },
   {
     name: "Iceman",
@@ -846,9 +873,10 @@ export const heroes: Hero[] = [
       name: "",
       value: 0,
       type: "flat",
-    }, 
+    },
     damageType: ["Energy"],
     keywords: ["Shatter", "Chill"],
+    bonusDmgKeywords: ["Shatter", "Chill"],
   },
   {
     name: "Invisible Woman",
@@ -878,6 +906,7 @@ export const heroes: Hero[] = [
     },
     damageType: ["Energy"],
     keywords: [""],
+    bonusDmgKeywords: [],
   },
   {
     name: "Iron Fist",
@@ -904,9 +933,10 @@ export const heroes: Hero[] = [
       name: "",
       value: 0,
       type: "flat",
-    }, 
+    },
     damageType: ["Mental", "Physical"],
-    keywords: ["Stance Opener"],
+    keywords: ["Stance Opener", "Stance Combo"],
+    bonusDmgKeywords: ["Stance Opener", "Stance Combo"],
   },
   {
     name: "Iron Man",
@@ -933,9 +963,10 @@ export const heroes: Hero[] = [
       name: "",
       value: 0,
       type: "flat",
-    }, 
+    },
     damageType: ["Energy", "Physical"],
-    keywords: ["Repulsor", "MicroLaser"],
+    keywords: ["Repulsor", "MicroLaser", "Missile"],
+    bonusDmgKeywords: ["Repulsor", "MicroLaser", "Missile"],
   },
   {
     name: "Jean Grey",
@@ -962,9 +993,10 @@ export const heroes: Hero[] = [
       name: "Phoenix Force",
       value: 100,
       type: "flat",
-    }, 
+    },
     damageType: ["Energy", "Physical"],
     keywords: [],
+    bonusDmgKeywords: [],
   },
   {
     name: "Juggernaut",
@@ -991,9 +1023,10 @@ export const heroes: Hero[] = [
       name: "",
       value: 0,
       type: "flat",
-    }, 
+    },
     damageType: ["Physical"],
     keywords: ["Non-Movement"],
+    bonusDmgKeywords: ["Non-Movement"],
   },
   {
     name: "Kitty Pryde",
@@ -1020,9 +1053,10 @@ export const heroes: Hero[] = [
       name: "",
       value: 0,
       type: "flat",
-    }, 
+    },
     damageType: ["Energy", "Physical"],
     keywords: ["Sword", "Lockheed", "Non-Lockheed"],
+    bonusDmgKeywords: ["Sword", "Lockheed", "Non-Lockheed"],
   },
   {
     name: "Loki",
@@ -1049,9 +1083,10 @@ export const heroes: Hero[] = [
       name: "Illusions",
       value: 3,
       type: "flat",
-    }, 
+    },
     damageType: ["Mental"],
     keywords: ["Fire", "Light", "Ice", "Darkness"],
+    bonusDmgKeywords: ["Fire", "Light", "Ice", "Darkness"],
   },
   {
     name: "Luke Cage",
@@ -1078,9 +1113,10 @@ export const heroes: Hero[] = [
       name: "Combo Points",
       value: 4,
       type: "flat",
-    }, 
+    },
     damageType: ["Physical"],
     keywords: ["Finisher", "Hand-to-Hand"],
+    bonusDmgKeywords: ["Finisher", "Hand-to-Hand"],
   },
   {
     name: "Magik",
@@ -1107,9 +1143,10 @@ export const heroes: Hero[] = [
       name: "Souls",
       value: 5,
       type: "flat",
-    }, 
+    },
     damageType: ["Mental"],
     keywords: [],
+    bonusDmgKeywords: [],
   },
   {
     name: "Magneto",
@@ -1136,9 +1173,10 @@ export const heroes: Hero[] = [
       name: "",
       value: 0,
       type: "flat",
-    }, 
+    },
     damageType: ["Energy"],
     keywords: ["Debris Spending", "Debris Generator"],
+    bonusDmgKeywords: ["Debris Spending", "Debris Generator"],
   },
   {
     name: "Mister Fantastic",
@@ -1165,9 +1203,10 @@ export const heroes: Hero[] = [
       name: "",
       value: 0,
       type: "flat",
-    }, 
+    },
     damageType: ["Physical"],
     keywords: [],
+    bonusDmgKeywords: [],
   },
   {
     name: "Moon Knight",
@@ -1194,9 +1233,10 @@ export const heroes: Hero[] = [
       name: "",
       value: 0,
       type: "flat",
-    }, 
+    },
     damageType: ["Physical"],
     keywords: [],
+    bonusDmgKeywords: [],
   },
   {
     name: "Nick Fury",
@@ -1223,9 +1263,10 @@ export const heroes: Hero[] = [
       name: "",
       value: 0,
       type: "flat",
-    }, 
+    },
     damageType: ["Physical"],
     keywords: [],
+    bonusDmgKeywords: [],
   },
   {
     name: "Nightcrawler",
@@ -1252,9 +1293,10 @@ export const heroes: Hero[] = [
       name: "",
       value: 0,
       type: "flat",
-    }, 
+    },
     damageType: ["Physical"],
     keywords: ["Sword", "Flourish", "Teleport"],
+    bonusDmgKeywords: ["Sword", "Teleport"],
   },
   {
     name: "Nova",
@@ -1281,9 +1323,10 @@ export const heroes: Hero[] = [
       name: "Nova Shield",
       value: 150,
       type: "flat",
-    }, 
+    },
     damageType: ["Energy"],
     keywords: ["Pulsar", "Non-Pulsar"],
+    bonusDmgKeywords: ["Pulsar"],
   },
   {
     name: "Psylocke",
@@ -1310,9 +1353,10 @@ export const heroes: Hero[] = [
       name: "",
       value: 0,
       type: "flat",
-    }, 
+    },
     damageType: ["Mental", "Physical"],
     keywords: [],
+    bonusDmgKeywords: [],
   },
   {
     name: "Punisher",
@@ -1339,9 +1383,10 @@ export const heroes: Hero[] = [
       name: "",
       value: 0,
       type: "flat",
-    }, 
+    },
     damageType: ["Physical"],
     keywords: ["Grenade", "Shell", "Bullet"],
+    bonusDmgKeywords: ["Grenade", "Shell"],
   },
   {
     name: "Rocket Raccoon",
@@ -1368,9 +1413,10 @@ export const heroes: Hero[] = [
       name: "Combat Shield",
       value: 36,
       type: "scale",
-    }, 
+    },
     damageType: ["Energy"],
     keywords: [],
+    bonusDmgKeywords: [],
   },
   {
     name: "Rogue",
@@ -1397,9 +1443,10 @@ export const heroes: Hero[] = [
       name: "",
       value: 0,
       type: "flat",
-    }, 
+    },
     damageType: ["Energy", "Mental", "Physical"],
     keywords: ["Stolen", "Attrition", "Enhancement", "Impact", "Core", "Marvelous Physique"],
+    bonusDmgKeywords: ["Attrition", "Enhancement", "Impact", "Core"],
   },
   {
     name: "Scarlet Witch",
@@ -1429,6 +1476,7 @@ export const heroes: Hero[] = [
     },
     damageType: ["Mental"],
     keywords: [],
+    bonusDmgKeywords: [],
   },
   {
     name: "She-Hulk",
@@ -1459,6 +1507,7 @@ export const heroes: Hero[] = [
     },
     damageType: ["Physical"],
     keywords: [],
+    bonusDmgKeywords: [],
   },
   {
     name: "Silver Surfer",
@@ -1488,6 +1537,7 @@ export const heroes: Hero[] = [
     },
     damageType: ["Energy"],
     keywords: [],
+    bonusDmgKeywords: [],
   },
   {
     name: "Spider-Man",
@@ -1517,6 +1567,7 @@ export const heroes: Hero[] = [
     },
     damageType: ["Physical"],
     keywords: [],
+    bonusDmgKeywords: [],
   },
   {
     name: "Squirrel Girl",
@@ -1546,6 +1597,7 @@ export const heroes: Hero[] = [
     },
     damageType: ["Physical"],
     keywords: ["Claw", "Squirrel"],
+    bonusDmgKeywords: ["Squirrel"],
   },
   {
     name: "Star-Lord",
@@ -1575,6 +1627,7 @@ export const heroes: Hero[] = [
     },
     damageType: ["Energy"],
     keywords: ["Grenade"],
+    bonusDmgKeywords: ["Grenade"],
   },
   {
     name: "Storm",
@@ -1605,6 +1658,7 @@ export const heroes: Hero[] = [
     },
     damageType: ["Energy"],
     keywords: ["Lightning", "Wind"],
+    bonusDmgKeywords: ["Lightning", "Wind"],
   },
   {
     name: "Taskmaster",
@@ -1634,6 +1688,7 @@ export const heroes: Hero[] = [
     },
     damageType: ["Physical"],
     keywords: [],
+    bonusDmgKeywords: [],
   },
   {
     name: "Thing",
@@ -1664,6 +1719,7 @@ export const heroes: Hero[] = [
     },
     damageType: ["Physical"],
     keywords: ["Fantastic Friend"],
+    bonusDmgKeywords: [],
   },
   {
     name: "Thor",
@@ -1693,6 +1749,7 @@ export const heroes: Hero[] = [
     },
     damageType: ["Energy", "Physical"],
     keywords: [],
+    bonusDmgKeywords: [],
   },
   {
     name: "Ultron",
@@ -1722,6 +1779,7 @@ export const heroes: Hero[] = [
     },
     damageType: ["Energy", "Physical"],
     keywords: [],
+    bonusDmgKeywords: [],
   },
   {
     name: "Venom",
@@ -1751,6 +1809,7 @@ export const heroes: Hero[] = [
     },
     damageType: ["Physical"],
     keywords: ["Ichor"],
+    bonusDmgKeywords: [],
   },
   {
     name: "Vision",
@@ -1780,6 +1839,7 @@ export const heroes: Hero[] = [
     },
     damageType: ["Energy", "Physical"],
     keywords: ["Ultra-Dense", "Phasing"],
+    bonusDmgKeywords: [],
   },
   {
     name: "War Machine",
@@ -1809,6 +1869,7 @@ export const heroes: Hero[] = [
     },
     damageType: ["Physical"],
     keywords: ["Machine Gun", "Overheated"],
+    bonusDmgKeywords: ["Machine Gun"],
   },
   {
     name: "Winter Soldier",
@@ -1838,6 +1899,7 @@ export const heroes: Hero[] = [
     },
     damageType: ["Physical"],
     keywords: [],
+    bonusDmgKeywords: [],
   },
   {
     name: "Wolverine",
@@ -1867,6 +1929,7 @@ export const heroes: Hero[] = [
     },
     damageType: ["Physical"],
     keywords: ["Fury-spending"],
+    bonusDmgKeywords: ["Fury-spending"],
   },
   {
     name: "X-23",
@@ -1896,6 +1959,7 @@ export const heroes: Hero[] = [
     },
     damageType: ["Physical"],
     keywords: [],
+    bonusDmgKeywords: [],
   },
 ];
 

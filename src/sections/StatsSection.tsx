@@ -27,6 +27,15 @@ export default function StatsSection({ selectedHero, finalStats, onSave, onLoad,
     const [foldState, setFoldState] = useState<boolean | null>(null);
     const [statsConfig, setStatsConfig] = useState<StatsConfiguration>(DEFAULT_STATS_CONFIG);
     const [showStatsManager, setShowStatsManager] = useState(false);
+    const heroBonusDmgStats = (hero?.bonusDmgKeywords ?? [])
+        .map((keyword) => keyword.trim())
+        .filter((keyword, index, arr) => keyword.length > 0 && arr.indexOf(keyword) === index)
+        .map((keyword) => ({
+            id: `bonus-dmg-${keyword.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
+            name: `${keyword} Bonus DMG%`,
+            format: "{value}%",
+            showWhenExpanded: false,
+        }));
 
     // Load saved configuration from localStorage
     useEffect(() => {
@@ -188,6 +197,17 @@ export default function StatsSection({ selectedHero, finalStats, onSave, onLoad,
                                     </React.Fragment>
                                 );
                             })}
+                            {category.id === "offensive" &&
+                                heroBonusDmgStats.map((bonusDmgStat) => (
+                                    <React.Fragment key={bonusDmgStat.id}>
+                                        <StatDisplay
+                                            statConfig={bonusDmgStat}
+                                            value={finalStats[bonusDmgStat.name] ?? 0}
+                                            hero={hero}
+                                            isExpanded={expandState}
+                                        />
+                                    </React.Fragment>
+                                ))}
                         </StatCategory>
                     ))}
                 </Card>

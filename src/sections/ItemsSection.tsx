@@ -1,14 +1,40 @@
 import { Card, Dropdown } from "../components";
-import { useRef, useState, useEffect, useCallback } from "react";
+import { useRef, useState, useEffect, useCallback, useMemo } from "react";
 import { itemStats } from "../data/stats";
-import type { Item, StatType } from "../data/stats";
+import type { Item, StatType, DropdownCategory } from "../data/stats";
+import { heroes } from "../data/heroes";
 
 type ItemsSectionProps = {
     items: Item[];
     setItems: React.Dispatch<React.SetStateAction<Item[]>>;
+    selectedHero: string;
 };
 
-export default function ItemsSection({ items, setItems }: ItemsSectionProps) {
+export default function ItemsSection({ items, setItems, selectedHero }: ItemsSectionProps) {
+    const hero = heroes.find((h) => h.name === selectedHero);
+    const availableItemStats = useMemo<DropdownCategory[]>(() => {
+        const keywordBonusDmg = (hero?.keywords ?? [])
+            .map((keyword) => keyword.trim())
+            .filter((keyword, index, arr) => keyword.length > 0 && arr.indexOf(keyword) === index);
+
+        if (keywordBonusDmg.length === 0) return [...itemStats];
+
+        const heroKeywordCategories: DropdownCategory[] = [];
+
+        heroKeywordCategories.push({
+            category: "Hero Bonus DMG",
+            stats: keywordBonusDmg.map((keyword) => ({
+                name: `${keyword} Bonus DMG%`,
+                type: "percent" as const,
+            })),
+        });
+
+        return [
+            ...itemStats,
+            ...heroKeywordCategories,
+        ];
+    }, [hero]);
+
     const draggingCardIndex = useRef<number | null>(null);
     const draggingStatRef = useRef<{ cardId: number; index: number } | null>(null);
     const [focusedInput, setFocusedInput] = useState<{ cardId: number; statIndex?: number } | null>(null);
@@ -360,7 +386,7 @@ export default function ItemsSection({ items, setItems }: ItemsSectionProps) {
 
                                 {/* Dropdown */}
                                 <Dropdown
-                                    stats={itemStats}
+                                    stats={availableItemStats}
                                     addStatToCard={addStatToCard}
                                     cardId={card.id}
                                 />

@@ -3,6 +3,7 @@ import { conditionLabels } from "../data/stats";
 type DamageSectionProps = {
     finalStats: Record<string, number>;
     heroLevel: number;
+    heroKeywords: string[];
     damageCalculators: Array<{ baseMin: number; baseMax: number; keywords?: string[] }>;
     setDamageCalculators: (calculators: Array<{ baseMin: number; baseMax: number; keywords?: string[] }>) => void;
     globalCheckedConditions: boolean[];
@@ -62,6 +63,7 @@ const typeDmgKeys = [
     { tag: "Movement", key: "Total Movement DMG%" },
     { tag: "Signature", key: "Total Signature DMG%" },
 ] as const;
+const DAMAGE_TYPE_TAGS = ["Physical", "Melee", "Energy", "Ranged", "Mental", "Area", "Summon", "Movement", "Signature"] as const;
 
 function DamageCalculator({
     index,
@@ -69,6 +71,7 @@ function DamageCalculator({
     setState,
     finalStats,
     heroLevel,
+    heroKeywords,
     globalConditionBonusDmg,
     vuln
 }: {
@@ -77,11 +80,19 @@ function DamageCalculator({
     setState: (state: DamageCalculatorState) => void;
     finalStats: Record<string, number>;
     heroLevel: number;
+    heroKeywords: string[];
     globalConditionBonusDmg: number;
     vuln: number;
 }) {
     const { baseMin, baseMax } = state;
     const selectedKeywords = state.keywords ?? [];
+    const heroKeywordByLower = new Map(
+        heroKeywords.map((keyword) => [keyword.toLowerCase(), keyword])
+    );
+    const allSelectableKeywords = [...DAMAGE_TYPE_TAGS, ...heroKeywords].filter(
+        (keyword, index, arr) =>
+            arr.findIndex((k) => k.toLowerCase() === keyword.toLowerCase()) === index
+    );
 
     // Crit Hit
     const summedKeywordCritDelta = selectedKeywords
@@ -102,6 +113,12 @@ function DamageCalculator({
         .filter((x): x is typeof typeDmgKeys[number] => !!x)
         .map(k => (finalStats[k.key] ?? 0))
         .reduce((a, b) => a + b, 0);
+    const heroKeywordBaseDmg = selectedKeywords
+        .map((keyword) => heroKeywordByLower.get(keyword.toLowerCase()))
+        .filter((keyword): keyword is string => !!keyword)
+        .map((keyword) => finalStats[`${keyword} Bonus DMG%`] ?? 0)
+        .reduce((a, b) => a + b, 0);
+    const heroKeywordMultiplier = 1 + heroKeywordBaseDmg / 100;
 
     const totalDmgBonus = finalStats["Base DMG"] + summedKeywordDmgDelta + globalConditionBonusDmg;
 
@@ -110,8 +127,8 @@ function DamageCalculator({
     const startingMax = baseMax / (1 + finalStats["Starting Base DMG"] / 100);
 
     // Final
-    const finalMin = startingMin * (1 + totalDmgBonus / 100) * (1 + (vuln / 100));
-    const finalMax = startingMax * (1 + totalDmgBonus / 100) * (1 + (vuln / 100));
+    const finalMin = (startingMin * (1 + totalDmgBonus / 100) * (1 + (vuln / 100))) * (heroKeywordMultiplier);
+    const finalMax = (startingMax * (1 + totalDmgBonus / 100) * (1 + (vuln / 100))) * (heroKeywordMultiplier);
     const finalAvg = (finalMin + finalMax) / 2;
 
     const finalCritMin = finalMin * (finalStats["Total Crit DMG%"] / 100);
@@ -158,9 +175,11 @@ function DamageCalculator({
                 </div>
                 {/* Keywords Card */}
                 <div className="col-span-1 flex flex-col bg-gray-700 rounded p-2 border border-indigo-600">
-                    <span className="text-xs text-indigo-300 font-semibold mb-1">Keywords</span>
+                    <div className="flex items-center mb-1">
+                        <span className="text-xs text-indigo-300 font-semibold">Keywords</span>
+                    </div>
                     <div className="grid grid-cols-2 gap-1 text-[10px] text-white">
-                        {["Physical", "Melee", "Energy", "Ranged", "Mental", "Area", "Summon", "Movement", "Signature"].map(tag => (
+                        {allSelectableKeywords.map(tag => (
                             <label key={tag} className="flex items-center space-x-1">
                                 <input
                                     type="checkbox"
@@ -222,6 +241,7 @@ function DamageCalculator({
 export default function DamageSection({
     finalStats,
     heroLevel,
+    heroKeywords,
     damageCalculators,
     setDamageCalculators,
     globalCheckedConditions,
@@ -229,6 +249,10 @@ export default function DamageSection({
     vuln,
     setVuln
 }: DamageSectionProps) {
+    const heroKeywordByLower = new Map(
+        heroKeywords.map((keyword) => [keyword.toLowerCase(), keyword])
+    );
+
     function handleGlobalCheckboxToggle(idx: number) {
         const copy = [...globalCheckedConditions];
         copy[idx] = !copy[idx];
@@ -264,6 +288,12 @@ export default function DamageSection({
             .filter((x): x is typeof typeDmgKeys[number] => !!x)
             .map(k => (finalStats[k.key] ?? 0))
             .reduce((a, b) => a + b, 0);
+        const heroKeywordBaseDmg = selectedKeywords
+            .map((keyword) => heroKeywordByLower.get(keyword.toLowerCase()))
+            .filter((keyword): keyword is string => !!keyword)
+            .map((keyword) => finalStats[`${keyword} Bonus DMG%`] ?? 0)
+            .reduce((a, b) => a + b, 0);
+        const heroKeywordMultiplier = 1 + heroKeywordBaseDmg / 100;
 
         const totalDmgBonus = finalStats["Base DMG"] + summedKeywordDmgDelta + globalConditionBonusDmg;
 
@@ -272,8 +302,8 @@ export default function DamageSection({
         const startingMax = baseMax / (1 + finalStats["Starting Base DMG"] / 100);
 
         // Final damage calculation
-        const finalMin = startingMin * (1 + totalDmgBonus / 100) * (1 + (vuln / 100));
-        const finalMax = startingMax * (1 + totalDmgBonus / 100) * (1 + (vuln / 100));
+        const finalMin = startingMin * (1 + totalDmgBonus / 100) * (1 + (vuln / 100)) * heroKeywordMultiplier;
+        const finalMax = startingMax * (1 + totalDmgBonus / 100) * (1 + (vuln / 100)) * heroKeywordMultiplier;
         const finalAvg = (finalMin + finalMax) / 2;
 
         // Average damage calculation
@@ -281,8 +311,8 @@ export default function DamageSection({
         const pC = applicableCritHitPct * (1 - applicableBrutalStrikePct);
         const pB = applicableCritHitPct * applicableBrutalStrikePct;
 
-        const avgDmg = finalAvg * (pN * 1 + pC 
-            * (finalStats["Total Crit DMG%"] / 100) 
+        const avgDmg = finalAvg * (pN * 1 + pC
+            * (finalStats["Total Crit DMG%"] / 100)
             + pB * (finalStats["Total Brutal DMG%"] / 100));
 
         return total + avgDmg;
@@ -291,7 +321,7 @@ export default function DamageSection({
     return (
         <div className="p-2 sm:p-2">
             <p className="text-gray-400 pb-2 text-xs">
-                * Base Damage values: without 
+                * Base Damage values: without
                 items, talents, buffs, infinity, and synergy equipped/activated.
             </p>
             <div className="flex justify-center text-sm mb-4 px-4 py-2 bg-gray-700 rounded border border-amber-500">
@@ -316,6 +346,7 @@ export default function DamageSection({
                                 }}
                                 finalStats={finalStats}
                                 heroLevel={heroLevel}
+                                heroKeywords={heroKeywords}
                                 globalConditionBonusDmg={globalConditionBonusDmg}
                                 vuln={vuln}
                             />

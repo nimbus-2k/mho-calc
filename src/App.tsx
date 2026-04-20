@@ -60,7 +60,7 @@ export default function App() {
             baseMin: 0,
             baseMax: 0,
             attackSpeed: 1,
-            keywords: []
+            keywords: [],
         }))
     );
     const [globalCheckedConditions, setGlobalCheckedConditions] = useState<boolean[]>(
@@ -534,7 +534,7 @@ export default function App() {
                             {/* Tab Content */}
                             <div>
                                 {activeTab === "items" && (
-                                    <ItemsSection items={items} setItems={setItems} />
+                                    <ItemsSection items={items} setItems={setItems} selectedHero={selectedHero} />
                                 )}
                                 {activeTab === "infinity" && (
                                     <InfinitySection
@@ -560,6 +560,7 @@ export default function App() {
                                     <DamageSection
                                         finalStats={finalStats}
                                         heroLevel={heroLevel}
+                                        heroKeywords={hero?.keywords ?? []}
                                         damageCalculators={damageCalculators}
                                         setDamageCalculators={setDamageCalculators}
                                         globalCheckedConditions={globalCheckedConditions}
@@ -632,7 +633,7 @@ export default function App() {
                         {/* Tab Content - Mobile */}
                         <div className="mb-6">
                             {activeTab === "items" && (
-                                <ItemsSection items={items} setItems={setItems} />
+                                <ItemsSection items={items} setItems={setItems} selectedHero={selectedHero} />
                             )}
                             {activeTab === "infinity" && (
                                 <InfinitySection
@@ -658,6 +659,7 @@ export default function App() {
                                 <DamageSection
                                     finalStats={finalStats}
                                     heroLevel={heroLevel}
+                                    heroKeywords={hero?.keywords ?? []}
                                     damageCalculators={damageCalculators}
                                     setDamageCalculators={setDamageCalculators}
                                     globalCheckedConditions={globalCheckedConditions}
