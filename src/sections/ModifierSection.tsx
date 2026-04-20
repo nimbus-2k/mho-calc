@@ -33,7 +33,6 @@ const ALL_TYPES = [
 ];
 
 const COLORS: Record<string, string> = {
-    Base: "#6F6F6F",
     Physical: "#D4537E",
     Energy: "#378ADD",
     Mental: "#7F77DD",
@@ -170,6 +169,26 @@ export default function ModifierSection({
     }, [allCombos, finalStats]);
 
     const displayedCombos = useMemo(() => {
+        const extraTypes = ALL_TYPES.filter((t) => !(SLOT1 as readonly string[]).includes(t));
+        const hasAnyExtraTypeValue = extraTypes.some((t) => (finalStats[`Total ${t} DMG%`] ?? 0) > 0);
+
+        // If there are no values for non-primary tags, show only {Physical/Energy/Mental}
+        if (!hasAnyExtraTypeValue) {
+            const out: Array<{ label: string; types: string[] }> = [];
+            for (const type of SLOT1) {
+                const inHeroDefault =
+                    slot1IncludedFromHero.size === 0 ||
+                    slot1IncludedFromHero.has(type.toLowerCase());
+                const userTurnedOn = chartTypeEnabled[type] === true;
+
+                if (!isPrimaryLayerVisible(type)) continue;
+                if (!inHeroDefault && !userTurnedOn) continue;
+
+                out.push({ label: type, types: [type] });
+            }
+            return out;
+        }
+
         return validCombos.filter((combo) => {
             const containsHiddenType = combo.types.some((type) =>
                 isSlot1Type(type)
@@ -184,7 +203,7 @@ export default function ModifierSection({
                 return val <= 0;
             });
         });
-    }, [chartTypeEnabled, isPrimaryLayerVisible, validCombos, finalStats]);
+    }, [chartTypeEnabled, isPrimaryLayerVisible, validCombos, finalStats, slot1IncludedFromHero]);
 
     const handleLegendClick = useCallback((_e: unknown, legendItem: { text?: string }) => {
         const type = legendItem?.text;
@@ -199,31 +218,19 @@ export default function ModifierSection({
     const chartData = useMemo(
         () => ({
             labels: displayedCombos.map((c) => c.label),
-            datasets: [
-                {
-                    label: "Base",
-                    data: displayedCombos.map(() => {
-                        const baseValue = finalStats["Base DMG"] ?? 0;
-                        return baseValue > 0 ? parseFloat(baseValue.toFixed(2)) : null;
-                    }),
-                    backgroundColor: COLORS.Base,
-                    hidden: chartTypeEnabled["Base"] === false,
-                    borderWidth: 0,
-                },
-                ...usedTypes.map((type) => ({
-                    label: type,
-                    data: displayedCombos.map((c) => {
-                        const value = finalStats[`Total ${type} DMG%`] ?? 0;
+            datasets: usedTypes.map((type) => ({
+                label: type,
+                data: displayedCombos.map((c) => {
+                    const value = finalStats[`Total ${type} DMG%`] ?? 0;
 
-                        if (!c.types.includes(type)) return null;
+                    if (!c.types.includes(type)) return null;
 
-                        return value > 0 ? parseFloat((value).toFixed(2)) : null;
-                    }),
-                    backgroundColor: COLORS[type] ?? "#888780",
-                    hidden: !isPrimaryLayerVisible(type),
-                    borderWidth: 0,
-                })),
-            ],
+                    return value > 0 ? parseFloat((value).toFixed(2)) : null;
+                }),
+                backgroundColor: COLORS[type] ?? "#888780",
+                hidden: !isPrimaryLayerVisible(type),
+                borderWidth: 0,
+            })),
         }),
         [chartTypeEnabled, displayedCombos, finalStats, isPrimaryLayerVisible, usedTypes]
     );
@@ -281,7 +288,7 @@ export default function ModifierSection({
                                         const total = combo.types.reduce((sum, type) => {
                                             const value = finalStats[`Total ${type} DMG%`] ?? 0;
                                             return sum + (value > 0 ? value : 0);
-                                        }, finalStats["Base DMG"] ?? 0);
+                                        }, 0);
 
                                         return `Total: ${total.toFixed(2)}%`;
                                     },
