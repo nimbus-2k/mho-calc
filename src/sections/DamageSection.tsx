@@ -333,8 +333,6 @@ export default function DamageSection({
     }, new Map<string, number>());
     const sortedDamageProfileEntries = Array.from(damageProfileByKeywordCombo.entries())
         .sort((a, b) => b[1] - a[1]);
-    const topDamageEntry = sortedDamageProfileEntries[0];
-    const topDamageEntryPct = topDamageEntry && totalAvgDmg > 0 ? (topDamageEntry[1] / totalAvgDmg) * 100 : 0;
 
     return (
         <div className="p-2 sm:p-2">
@@ -417,18 +415,10 @@ export default function DamageSection({
             </div>
             <div className="mt-3 text-indigo-200 text-xs bg-gray-800/95 rounded-lg border border-indigo-600 shadow-[0_10px_30px_rgba(0,0,0,0.35)] backdrop-blur-sm p-2.5 sticky bottom-3 z-20">
                 <div className="font-semibold text-indigo-100 mb-2">Damage Profile</div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2">
+                <div className="grid grid-cols-1 gap-2 mb-2">
                     <div className="rounded border border-amber-500/60 bg-gray-900/50 px-2 py-1.5">
                         <div className="text-[10px] text-amber-300 uppercase tracking-wide">Total Avg Dmg</div>
                         <div className="text-sm font-bold text-amber-200">{formatIntegerWithCommas(totalAvgDmg)}</div>
-                    </div>
-                    <div className="rounded border border-indigo-500/60 bg-gray-900/50 px-2 py-1.5">
-                        <div className="text-[10px] text-indigo-300 uppercase tracking-wide">Top Share</div>
-                        <div className="text-sm font-bold text-indigo-100">{topDamageEntryPct.toFixed(1)}%</div>
-                    </div>
-                    <div className="rounded border border-blue-500/60 bg-gray-900/50 px-2 py-1.5">
-                        <div className="text-[10px] text-blue-300 uppercase tracking-wide">Top Combo</div>
-                        <div className="text-[11px] font-semibold text-blue-100 truncate">{topDamageEntry?.[0] ?? "-"}</div>
                     </div>
                 </div>
                 <div className="text-[10px] text-gray-400 uppercase tracking-wide mb-1">Contribution by keyword combo</div>
