@@ -93,9 +93,10 @@ export function calculateFinalStats(
   const totalBaseHealth =
     baseHealth * (1 + (infinityHealthBuff + synergyHealthBuff));
   finalStats["Base Health"] = totalBaseHealth;
+  const trait2Health = hero.trait2 === "Base DMG and Health from Spirit" ? baseHealth * 0.1 : 0;
   const trait3health = trait3 === "Health" ? 0.25 * ((350 / 3) * heroLevel) : 0;
   const plusHealth =
-    (itemTotals["Health"] ?? 0) + trait3health + heroLevel * dur;
+    (itemTotals["Health"] ?? 0) + trait3health + heroLevel * dur + trait2Health;
   finalStats["Health"] = plusHealth;
   const maxHealth = totalBaseHealth + plusHealth;
   finalStats["Max Health"] = maxHealth;
@@ -212,10 +213,20 @@ export function calculateFinalStats(
       : 0;
   const trait2BaseDmgOfSpirit =
     hero.trait2 === "Base DMG and Health from Spirit" ? maxSpirit * 0.05 : 0;
+  const traitBaseDmgFromSpiritUnique =
+    hero.trait1 === "Base Dmg 3% of Max Spirit" ? maxSpirit * 0.03 : 0;
+  const traitBaseDmgFromTenacityUnique =
+    hero.trait1 === "Base Dmg 2% of Tenacity" ? (itemTotals["Tenacity"] ?? 0) * 0.02 : 0;
+  const traitBaseDmgFromMissingHealthUnique =
+    hero.trait1 === "Base Dmg 0.3% of Missing Health" ? maxHealth * 0.003 : 0;
+  const uniqueTraitBaseDmgBonus =
+    traitBaseDmgFromSpiritUnique +
+    traitBaseDmgFromTenacityUnique +
+    traitBaseDmgFromMissingHealthUnique;
   finalStats["Starting Base DMG"] =
-    startingBaseDmg + trait1BaseDmgOfBnsHp + trait2BaseDmgOfSpirit;
+    startingBaseDmg + trait1BaseDmgOfBnsHp + trait2BaseDmgOfSpirit + uniqueTraitBaseDmgBonus;
   finalStats["Base DMG"] =
-    baseDmg + trait1BaseDmgOfBnsHp + trait2BaseDmgOfSpirit;
+    baseDmg + trait1BaseDmgOfBnsHp + trait2BaseDmgOfSpirit + uniqueTraitBaseDmgBonus;
 
   const dmgRatingConverted = dmgRating / 40;
   finalStats["DMG%"] = dmgRatingConverted;
@@ -310,7 +321,7 @@ export function calculateFinalStats(
     (synergy["DMG vs Enemies Targeting You"] ?? 0) +
     (itemTotals["Targeting You"] ?? 0) / 40;
   finalStats["DMG vs Not Targeting You"] =
-    (hero.trait1 === "DMG vs Not Targeting You" ? 20 : 0) +
+    (hero.trait1 === "+20% Dmg vs Not Targeting You" ? 20 : 0) +
     (synergy["DMG vs Enemies Not Targeting You"] ?? 0) +
     (itemTotals["Not Targeting You"] ?? 0 / 40);
   finalStats["DMG vs Unaware Targets"] =
@@ -321,7 +332,8 @@ export function calculateFinalStats(
   finalStats["DMG vs Slowed"] =
     (synergy["DMG vs Slowed Targets"] ?? 0) + (itemTotals["Slowed"] ?? 0) / 40;
   finalStats["DMG vs Knockdown"] = (itemTotals["Knockdown"] ?? 0) / 40;
-  finalStats["DMG vs Chilled"] = (itemTotals["Chilled"] ?? 0) / 40;
+  finalStats["DMG vs Chilled"] =
+    (itemTotals["Chilled"] ?? 0) / 40 + (hero.trait1 === "+15% Dmg vs Chilled" ? 15 : 0);
   finalStats["DMG vs Frozen"] = (itemTotals["Frozen"] ?? 0) / 40;
   finalStats["DMG vs Vulnerable"] = (itemTotals["Vulnerable"] ?? 0) / 40;
   finalStats["DMG vs Taunted"] = (itemTotals["Taunted"] ?? 0) / 40;
@@ -332,7 +344,8 @@ export function calculateFinalStats(
   finalStats["DMG vs Feared"] = (itemTotals["Feared"] ?? 0) / 40;
   finalStats["DMG vs Bleeding"] =
     (synergy["DMG vs Bleeding"] ?? 0) + (itemTotals["Bleeding"] ?? 0) / 40;
-  finalStats["DMG vs Burning"] = (itemTotals["Burning"] ?? 0) / 40;
+  finalStats["DMG vs Burning"] =
+    (itemTotals["Burning"] ?? 0) / 40 + (hero.trait1 === "+15% Dmg vs Burning" ? 15 : 0);
   finalStats["DMG vs Hellfire"] = (itemTotals["Hellfire"] ?? 0) / 40;
   finalStats["DMG vs Machines"] = synergy["DMG vs Machines"] ?? 0;
   finalStats["DMG vs Demon Status"] = (itemTotals["Demon Status"] ?? 0) / 40;

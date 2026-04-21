@@ -453,17 +453,6 @@ export default function App() {
                                 <li> Summoned Ally Stats</li>
                                 <li> Avg. Effective Health</li>
                                 <li> [Type] Brutal Strike (ex. Betty Ross' BigAss Sword)</li>
-                                <li> Unique Traits:</li>
-                                <ul className="list-disc pl-6">
-                                    <li> +25% Incantation Powers</li>
-                                    <li> +15% Dmg vs Burning</li>
-                                    <li> +15% Dmg vs Chilled</li>
-                                    <li> Base Dmg 3% of Max Spirit</li>
-                                    <li> Base Dmg 2% of Tenacity</li>
-                                    <li> 0.3% Dmg of Missing Health</li>
-                                    <li> Base Dmg 3% of Max Spirit</li>
-                                    <li> Summon Powers Dmg</li>
-                                </ul>
                             </ul>
                         </div>
                     </div>
