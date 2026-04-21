@@ -18,6 +18,16 @@ type DamageCalculatorState = {
     keywords?: string[];
 }
 
+type DamageCalculationResult = {
+    avgDmg: number;
+    finalMin: number;
+    finalMax: number;
+    finalCritMin: number;
+    finalCritMax: number;
+    finalBrutalMin: number;
+    finalBrutalMax: number;
+};
+
 function formatNumberSmallDecimal(n: number) {
     if (isNaN(n)) return n;
     const rounded = Math.round(n * 100) / 100;
@@ -65,6 +75,79 @@ const typeDmgKeys = [
 ] as const;
 const DAMAGE_TYPE_TAGS = ["Physical", "Melee", "Energy", "Ranged", "Mental", "Area", "Summon", "Movement", "Signature"] as const;
 
+function calculateDamageValues({
+    calculator,
+    finalStats,
+    heroLevel,
+    heroKeywordByLower,
+    globalConditionBonusDmg,
+    vuln,
+}: {
+    calculator: DamageCalculatorState;
+    finalStats: Record<string, number>;
+    heroLevel: number;
+    heroKeywordByLower: Map<string, string>;
+    globalConditionBonusDmg: number;
+    vuln: number;
+}): DamageCalculationResult {
+    const { baseMin, baseMax } = calculator;
+    const selectedKeywords = calculator.keywords ?? [];
+
+    const summedKeywordCritDelta = selectedKeywords
+        .map((t) => typeCritKeys.find((k) => k.tag.toLowerCase() === t.toLowerCase()))
+        .filter((x): x is typeof typeCritKeys[number] => !!x)
+        .map((k) => ((finalStats["Crit Hit Rating"] ?? 0) - (finalStats[k.key] ?? 0)))
+        .reduce((a, b) => a + b, 0);
+    const keywordCritHit = 10 +
+        (89 * summedKeywordCritDelta) / (summedKeywordCritDelta + 80 * heroLevel);
+    const applicableCritHitPct = Math.round((keywordCritHit ?? 0) / 100 * 1000) / 1000;
+
+    const applicableBrutalStrikePct = Math.round((finalStats["Total Brutal Strike%"] ?? 0) / 100 * 1000) / 1000;
+
+    const summedKeywordDmgDelta = selectedKeywords
+        .map((t) => typeDmgKeys.find((k) => k.tag.toLowerCase() === t.toLowerCase()))
+        .filter((x): x is typeof typeDmgKeys[number] => !!x)
+        .map((k) => (finalStats[k.key] ?? 0))
+        .reduce((a, b) => a + b, 0);
+    const heroKeywordBaseDmg = selectedKeywords
+        .map((keyword) => heroKeywordByLower.get(keyword.toLowerCase()))
+        .filter((keyword): keyword is string => !!keyword)
+        .map((keyword) => finalStats[`${keyword} Bonus DMG%`] ?? 0)
+        .reduce((a, b) => a + b, 0);
+    const heroKeywordMultiplier = 1 + heroKeywordBaseDmg / 100;
+
+    const totalDmgBonus = finalStats["Base DMG"] + summedKeywordDmgDelta + globalConditionBonusDmg;
+
+    const startingMin = baseMin / (1 + finalStats["Starting Base DMG"] / 100);
+    const startingMax = baseMax / (1 + finalStats["Starting Base DMG"] / 100);
+
+    const finalMin = (startingMin * (1 + totalDmgBonus / 100) * (1 + (vuln / 100))) * (heroKeywordMultiplier);
+    const finalMax = (startingMax * (1 + totalDmgBonus / 100) * (1 + (vuln / 100))) * (heroKeywordMultiplier);
+    const finalAvg = (finalMin + finalMax) / 2;
+
+    const finalCritMin = finalMin * (finalStats["Total Crit DMG%"] / 100);
+    const finalCritMax = finalMax * (finalStats["Total Crit DMG%"] / 100);
+
+    const finalBrutalMin = finalMin * (finalStats["Total Brutal DMG%"] / 100);
+    const finalBrutalMax = finalMax * (finalStats["Total Brutal DMG%"] / 100);
+
+    const pN = 1 - applicableCritHitPct;
+    const pC = applicableCritHitPct * (1 - applicableBrutalStrikePct);
+    const pB = applicableCritHitPct * applicableBrutalStrikePct;
+
+    const avgDmg = finalAvg * (pN * 1 + pC * (finalStats["Total Crit DMG%"] / 100) + pB * (finalStats["Total Brutal DMG%"] / 100));
+
+    return {
+        avgDmg,
+        finalMin,
+        finalMax,
+        finalCritMin,
+        finalCritMax,
+        finalBrutalMin,
+        finalBrutalMax,
+    };
+}
+
 function DamageCalculator({
     index,
     state,
@@ -73,7 +156,8 @@ function DamageCalculator({
     heroLevel,
     heroKeywords,
     globalConditionBonusDmg,
-    vuln
+    vuln,
+    totalAvgDmg
 }: {
     index: number;
     state: DamageCalculatorState;
@@ -83,6 +167,7 @@ function DamageCalculator({
     heroKeywords: string[];
     globalConditionBonusDmg: number;
     vuln: number;
+    totalAvgDmg: number;
 }) {
     const { baseMin, baseMax } = state;
     const selectedKeywords = state.keywords ?? [];
@@ -94,55 +179,15 @@ function DamageCalculator({
             arr.findIndex((k) => k.toLowerCase() === keyword.toLowerCase()) === index
     );
 
-    // Crit Hit
-    const summedKeywordCritDelta = selectedKeywords
-        .map(t => typeCritKeys.find(k => k.tag.toLowerCase() === t.toLowerCase()))
-        .filter((x): x is typeof typeCritKeys[number] => !!x)
-        .map(k => ((finalStats["Crit Hit Rating"] ?? 0) - (finalStats[k.key] ?? 0)))
-        .reduce((a, b) => a + b, 0);
-    const keywordCritHit = 10 +
-        (89 * summedKeywordCritDelta) / (summedKeywordCritDelta + 80 * heroLevel)
-    const applicableCritHitPct = Math.round((keywordCritHit ?? 0) / 100 * 1000) / 1000;
-
-    // Brutal Strike
-    const applicableBrutalStrikePct = Math.round((finalStats["Total Brutal Strike%"] ?? 0) / 100 * 1000) / 1000;
-
-    // Dmg%
-    const summedKeywordDmgDelta = selectedKeywords
-        .map(t => typeDmgKeys.find(k => k.tag.toLowerCase() === t.toLowerCase()))
-        .filter((x): x is typeof typeDmgKeys[number] => !!x)
-        .map(k => (finalStats[k.key] ?? 0))
-        .reduce((a, b) => a + b, 0);
-    const heroKeywordBaseDmg = selectedKeywords
-        .map((keyword) => heroKeywordByLower.get(keyword.toLowerCase()))
-        .filter((keyword): keyword is string => !!keyword)
-        .map((keyword) => finalStats[`${keyword} Bonus DMG%`] ?? 0)
-        .reduce((a, b) => a + b, 0);
-    const heroKeywordMultiplier = 1 + heroKeywordBaseDmg / 100;
-
-    const totalDmgBonus = finalStats["Base DMG"] + summedKeywordDmgDelta + globalConditionBonusDmg;
-
-    // Base
-    const startingMin = baseMin / (1 + finalStats["Starting Base DMG"] / 100);
-    const startingMax = baseMax / (1 + finalStats["Starting Base DMG"] / 100);
-
-    // Final
-    const finalMin = (startingMin * (1 + totalDmgBonus / 100) * (1 + (vuln / 100))) * (heroKeywordMultiplier);
-    const finalMax = (startingMax * (1 + totalDmgBonus / 100) * (1 + (vuln / 100))) * (heroKeywordMultiplier);
-    const finalAvg = (finalMin + finalMax) / 2;
-
-    const finalCritMin = finalMin * (finalStats["Total Crit DMG%"] / 100);
-    const finalCritMax = finalMax * (finalStats["Total Crit DMG%"] / 100);
-
-    const finalBrutalMin = finalMin * (finalStats["Total Brutal DMG%"] / 100);
-    const finalBrutalMax = finalMax * (finalStats["Total Brutal DMG%"] / 100);
-
-    // Avg Dmg
-    const pN = 1 - applicableCritHitPct;
-    const pC = applicableCritHitPct * (1 - applicableBrutalStrikePct);
-    const pB = applicableCritHitPct * applicableBrutalStrikePct;
-
-    const avgDmg = finalAvg * (pN * 1 + pC * (finalStats["Total Crit DMG%"] / 100) + pB * (finalStats["Total Brutal DMG%"] / 100));
+    const { avgDmg, finalMin, finalMax, finalCritMin, finalCritMax, finalBrutalMin, finalBrutalMax } = calculateDamageValues({
+        calculator: state,
+        finalStats,
+        heroLevel,
+        heroKeywordByLower,
+        globalConditionBonusDmg,
+        vuln,
+    });
+    const damageSharePct = totalAvgDmg > 0 ? (avgDmg / totalAvgDmg) * 100 : 0;
 
     return (
         <div className="bg-gray-800 rounded-lg p-3 border border-gray-700">
@@ -234,6 +279,9 @@ function DamageCalculator({
                     <span className="font-bold">{formatIntegerWithCommas(avgDmg)}</span>
                 </span>
             </div>
+            <div className="text-center text-[11px] text-indigo-300 mt-1">
+                Share of total: <span className="font-semibold text-indigo-200">{damageSharePct.toFixed(1)}%</span>
+            </div>
         </div>
     );
 }
@@ -265,58 +313,28 @@ export default function DamageSection({
         .reduce((a, b) => a + b, 0);
 
     // Calculate total average damage from all calculators
-    const totalAvgDmg = damageCalculators.reduce((total, calculator) => {
-        const { baseMin, baseMax } = calculator;
-        const selectedKeywords = calculator.keywords ?? [];
-
-        // Crit Hit calculation
-        const summedKeywordCritDelta = selectedKeywords
-            .map(t => typeCritKeys.find(k => k.tag.toLowerCase() === t.toLowerCase()))
-            .filter((x): x is typeof typeCritKeys[number] => !!x)
-            .map(k => ((finalStats["Crit Hit Rating"] ?? 0) - (finalStats[k.key] ?? 0)))
-            .reduce((a, b) => a + b, 0);
-        const keywordCritHit = 10 +
-            (89 * summedKeywordCritDelta) / (summedKeywordCritDelta + 80 * heroLevel)
-        const applicableCritHitPct = Math.round((keywordCritHit ?? 0) / 100 * 1000) / 1000;
-
-        // Brutal Strike calculation
-        const applicableBrutalStrikePct = Math.round((finalStats["Total Brutal Strike%"] ?? 0) / 100 * 1000) / 1000;
-
-        // Dmg% calculation
-        const summedKeywordDmgDelta = selectedKeywords
-            .map(t => typeDmgKeys.find(k => k.tag.toLowerCase() === t.toLowerCase()))
-            .filter((x): x is typeof typeDmgKeys[number] => !!x)
-            .map(k => (finalStats[k.key] ?? 0))
-            .reduce((a, b) => a + b, 0);
-        const heroKeywordBaseDmg = selectedKeywords
-            .map((keyword) => heroKeywordByLower.get(keyword.toLowerCase()))
-            .filter((keyword): keyword is string => !!keyword)
-            .map((keyword) => finalStats[`${keyword} Bonus DMG%`] ?? 0)
-            .reduce((a, b) => a + b, 0);
-        const heroKeywordMultiplier = 1 + heroKeywordBaseDmg / 100;
-
-        const totalDmgBonus = finalStats["Base DMG"] + summedKeywordDmgDelta + globalConditionBonusDmg;
-
-        // Base damage calculation
-        const startingMin = baseMin / (1 + finalStats["Starting Base DMG"] / 100);
-        const startingMax = baseMax / (1 + finalStats["Starting Base DMG"] / 100);
-
-        // Final damage calculation
-        const finalMin = startingMin * (1 + totalDmgBonus / 100) * (1 + (vuln / 100)) * heroKeywordMultiplier;
-        const finalMax = startingMax * (1 + totalDmgBonus / 100) * (1 + (vuln / 100)) * heroKeywordMultiplier;
-        const finalAvg = (finalMin + finalMax) / 2;
-
-        // Average damage calculation
-        const pN = 1 - applicableCritHitPct;
-        const pC = applicableCritHitPct * (1 - applicableBrutalStrikePct);
-        const pB = applicableCritHitPct * applicableBrutalStrikePct;
-
-        const avgDmg = finalAvg * (pN * 1 + pC
-            * (finalStats["Total Crit DMG%"] / 100)
-            + pB * (finalStats["Total Brutal DMG%"] / 100));
-
-        return total + avgDmg;
-    }, 0);
+    const damageResults = damageCalculators.map((calculator) => calculateDamageValues({
+        calculator,
+        finalStats,
+        heroLevel,
+        heroKeywordByLower,
+        globalConditionBonusDmg,
+        vuln,
+    }));
+    const totalAvgDmg = damageResults.reduce((total, result) => total + result.avgDmg, 0);
+    const damageProfileByKeywordCombo = damageCalculators.reduce((acc, calculator, idx) => {
+        const comboKey = (calculator.keywords ?? [])
+            .map((k) => k.trim())
+            .filter((k) => k.length > 0)
+            .join(" / ") || "No Keywords";
+        const prev = acc.get(comboKey) ?? 0;
+        acc.set(comboKey, prev + damageResults[idx].avgDmg);
+        return acc;
+    }, new Map<string, number>());
+    const sortedDamageProfileEntries = Array.from(damageProfileByKeywordCombo.entries())
+        .sort((a, b) => b[1] - a[1]);
+    const topDamageEntry = sortedDamageProfileEntries[0];
+    const topDamageEntryPct = topDamageEntry && totalAvgDmg > 0 ? (topDamageEntry[1] / totalAvgDmg) * 100 : 0;
 
     return (
         <div className="p-2 sm:p-2">
@@ -324,12 +342,6 @@ export default function DamageSection({
                 * Base Damage values: without
                 items, talents, buffs, infinity, and synergy equipped/activated.
             </p>
-            <div className="flex justify-center text-sm mb-4 px-4 py-2 bg-gray-700 rounded border border-amber-500">
-                <span className="text-amber-500 mr-8">
-                    <span className="font-bold">Total Avg Dmg: {formatIntegerWithCommas(totalAvgDmg)}</span>
-                </span>
-            </div>
-
             <div className="flex gap-4 h-full">
                 {/* Main Content Area with 8 calculators */}
                 <div className="flex-1 overflow-y-auto">
@@ -349,6 +361,7 @@ export default function DamageSection({
                                 heroKeywords={heroKeywords}
                                 globalConditionBonusDmg={globalConditionBonusDmg}
                                 vuln={vuln}
+                                totalAvgDmg={totalAvgDmg}
                             />
                         ))}
                     </div>
@@ -391,7 +404,6 @@ export default function DamageSection({
                     <div className="text-indigo-200 text-xs mt-4 p-2 bg-gray-700 rounded">
                         <span className="mb-1">Bonus DMG: </span><span className="font-semibold">{formatIntegerWithCommas(globalConditionBonusDmg)}%</span>
                     </div>
-
                     {/* Quick Actions */}
                     <div className="mt-4">
                         <button
@@ -401,6 +413,35 @@ export default function DamageSection({
                             Deselect All
                         </button>
                     </div>
+                </div>
+            </div>
+            <div className="mt-3 text-indigo-200 text-xs bg-gray-800/95 rounded-lg border border-indigo-600 shadow-[0_10px_30px_rgba(0,0,0,0.35)] backdrop-blur-sm p-2.5 sticky bottom-3 z-20">
+                <div className="font-semibold text-indigo-100 mb-2">Damage Profile</div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2">
+                    <div className="rounded border border-amber-500/60 bg-gray-900/50 px-2 py-1.5">
+                        <div className="text-[10px] text-amber-300 uppercase tracking-wide">Total Avg Dmg</div>
+                        <div className="text-sm font-bold text-amber-200">{formatIntegerWithCommas(totalAvgDmg)}</div>
+                    </div>
+                    <div className="rounded border border-indigo-500/60 bg-gray-900/50 px-2 py-1.5">
+                        <div className="text-[10px] text-indigo-300 uppercase tracking-wide">Top Share</div>
+                        <div className="text-sm font-bold text-indigo-100">{topDamageEntryPct.toFixed(1)}%</div>
+                    </div>
+                    <div className="rounded border border-blue-500/60 bg-gray-900/50 px-2 py-1.5">
+                        <div className="text-[10px] text-blue-300 uppercase tracking-wide">Top Combo</div>
+                        <div className="text-[11px] font-semibold text-blue-100 truncate">{topDamageEntry?.[0] ?? "-"}</div>
+                    </div>
+                </div>
+                <div className="text-[10px] text-gray-400 uppercase tracking-wide mb-1">Contribution by keyword combo</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                    {sortedDamageProfileEntries.map(([comboLabel, comboAvgDmg]) => {
+                        const sharePct = totalAvgDmg > 0 ? (comboAvgDmg / totalAvgDmg) * 100 : 0;
+                        return (
+                            <div key={`share-${comboLabel}`} className="flex items-center justify-between gap-2 px-2 py-1 rounded border border-gray-700/70 bg-gray-900/30">
+                                <span className="truncate text-[11px]">{comboLabel}</span>
+                                <span className="font-semibold">{sharePct.toFixed(1)}%</span>
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
         </div>
