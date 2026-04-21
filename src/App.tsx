@@ -1,4 +1,5 @@
 import "./App.css";
+import { Analytics } from "@vercel/analytics/react"
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { type Item, conditionLabels } from "./data/stats";
 import { type Hero, heroes } from "./data/heroes";
@@ -67,7 +68,7 @@ export default function App() {
         Array(conditionLabels.length).fill(false)
     );
     const [vuln, setVuln] = useState<number>(0);
-    
+
     // Modifier Section 
     const [modifierChartTypeEnabled, setModifierChartTypeEnabled] = useState<Record<string, boolean>>({});
 
@@ -376,6 +377,7 @@ export default function App() {
 
     return (
         <>
+            <Analytics />
             {/* Modal Overlay */}
             {infoModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4 py-8">
