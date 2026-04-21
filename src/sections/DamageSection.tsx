@@ -109,12 +109,12 @@ function calculateDamageValues({
         .filter((x): x is typeof typeDmgKeys[number] => !!x)
         .map((k) => (finalStats[k.key] ?? 0))
         .reduce((a, b) => a + b, 0);
-    const heroKeywordBaseDmg = selectedKeywords
+    const heroKeywordBonusDmg = selectedKeywords
         .map((keyword) => heroKeywordByLower.get(keyword.toLowerCase()))
         .filter((keyword): keyword is string => !!keyword)
         .map((keyword) => finalStats[`${keyword} Bonus DMG%`] ?? 0)
         .reduce((a, b) => a + b, 0);
-    const heroKeywordMultiplier = 1 + heroKeywordBaseDmg / 100;
+    const heroKeywordMultiplier = 1 + heroKeywordBonusDmg / 100;
 
     const totalDmgBonus = finalStats["Base DMG"] + summedKeywordDmgDelta + globalConditionBonusDmg;
 

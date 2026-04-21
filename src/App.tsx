@@ -571,7 +571,7 @@ export default function App() {
                                     <DamageSection
                                         finalStats={finalStats}
                                         heroLevel={heroLevel}
-                                        heroKeywords={hero?.bonusDmgKeywords ?? []}
+                                        heroKeywords={hero?.keywords ?? []}
                                         damageCalculators={damageCalculators}
                                         setDamageCalculators={setDamageCalculators}
                                         globalCheckedConditions={globalCheckedConditions}
@@ -670,7 +670,7 @@ export default function App() {
                                 <DamageSection
                                     finalStats={finalStats}
                                     heroLevel={heroLevel}
-                                    heroKeywords={hero?.bonusDmgKeywords ?? []}
+                                    heroKeywords={hero?.keywords ?? []}
                                     damageCalculators={damageCalculators}
                                     setDamageCalculators={setDamageCalculators}
                                     globalCheckedConditions={globalCheckedConditions}

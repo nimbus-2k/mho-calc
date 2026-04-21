@@ -13,7 +13,7 @@ type ItemsSectionProps = {
 export default function ItemsSection({ items, setItems, selectedHero }: ItemsSectionProps) {
     const hero = heroes.find((h) => h.name === selectedHero);
     const availableItemStats = useMemo<DropdownCategory[]>(() => {
-        const keywordBonusDmg = (hero?.keywords ?? [])
+        const keywordBonusDmg = (hero?.bonusDmgKeywords ?? [])
             .map((keyword) => keyword.trim())
             .filter((keyword, index, arr) => keyword.length > 0 && arr.indexOf(keyword) === index);
 
