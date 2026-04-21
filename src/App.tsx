@@ -13,6 +13,7 @@ import SynergySection from "./sections/SynergySection.tsx";
 import ModifierSection from "./sections/ModifierSection.tsx";
 
 const MODIFIER_SLOT1_PRIMARY = ["Physical", "Energy", "Mental"] as const;
+const DAMAGE_SECTION_UNIVERSAL_KEYWORDS = ["Physical", "Melee", "Energy", "Ranged", "Mental", "Area", "Summon", "Movement", "Signature"] as const;
 
 function slot1LegendDefaultsForHero(heroName: string): Record<(typeof MODIFIER_SLOT1_PRIMARY)[number], boolean> {
     const hero = heroes.find((h) => h.name === heroName);
@@ -91,6 +92,25 @@ export default function App() {
                     changed = true;
                 }
             }
+            return changed ? next : prev;
+        });
+    }, [selectedHero]);
+
+    // When switching heroes, drop any previously-selected hero-specific keywords that don't exist on the new hero.
+    // (Keeps universal damage-type keywords like Physical/Melee/etc.)
+    useEffect(() => {
+        const heroBonusKeywordsLower = new Set((hero?.bonusDmgKeywords ?? []).map((k) => k.toLowerCase()));
+        const universalLower = new Set(DAMAGE_SECTION_UNIVERSAL_KEYWORDS.map((k) => k.toLowerCase()));
+        const allowedLower = new Set<string>([...heroBonusKeywordsLower, ...universalLower]);
+
+        setDamageCalculators((prev) => {
+            let changed = false;
+            const next = prev.map((calc) => {
+                const current = calc.keywords ?? [];
+                const filtered = current.filter((k) => allowedLower.has(k.toLowerCase()));
+                if (filtered.length !== current.length) changed = true;
+                return filtered.length === current.length ? calc : { ...calc, keywords: filtered };
+            });
             return changed ? next : prev;
         });
     }, [selectedHero]);
