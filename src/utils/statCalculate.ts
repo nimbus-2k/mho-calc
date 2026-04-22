@@ -460,7 +460,7 @@ export function calculateFinalStats(
   finalStats["Brutal DMG Rating"] = brutalDmgRating;
   const brutalDmg = 150 + brutalDmgRating / 80;
   const synergyBrutalDmg = synergy["Brutal DMG%"] ?? 0;
-  const infinityBrutalDmg = infinity["Brutal DMG%"] ?? 0;
+  const infinityBrutalDmg = (infinity["Brutal DMG%"] ?? 0) / 10;
   const plusBrutalDmg = synergyBrutalDmg + infinityBrutalDmg * 10;
   finalStats["Brutal DMG% (+)"] = plusBrutalDmg;
   const totalBrutalDmg = totalCritDmg + brutalDmg + plusBrutalDmg;

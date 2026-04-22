@@ -76,7 +76,7 @@ export const gemStats: Record<string, StatConfig[]> = {
       key: "Brutal DMG%",
       label: "Brutal DMG% (+1%/2pts)",
       cost: 2,
-      increment: 0.1,
+      increment: 1,
       max: 75,
       category: "infinity",
       format: "percent",
