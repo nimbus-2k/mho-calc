@@ -1,5 +1,6 @@
 import "./App.css";
 import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { useState, useMemo, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { type Item, conditionLabels } from "./data/stats";
 import { type Hero, heroes } from "./data/heroes";
@@ -399,6 +400,7 @@ export default function App() {
     return (
         <>
             <Analytics />
+            <SpeedInsights />
             {/* Modal Overlay */}
             {infoModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4 py-8">
