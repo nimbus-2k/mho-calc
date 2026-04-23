@@ -347,7 +347,7 @@ export const heroes: Hero[] = [
       Energy: 1,
       Intelligence: 3,
     },
-    trait1: "Unique",
+    trait1: "+30% Serum",
     trait3: "Projectile Reflect",
     moveSpeed: 310,
     spirit1: {
@@ -558,7 +558,7 @@ export const heroes: Hero[] = [
       Energy: 6,
       Intelligence: 6,
     },
-    trait1: "Summon Powers DMG",
+    trait1: "+25% Summon",
     trait3: "Health",
     moveSpeed: 310,
     spirit1: {
@@ -588,7 +588,7 @@ export const heroes: Hero[] = [
       Energy: 7,
       Intelligence: 6,
     },
-    trait1: "Unique",
+    trait1: "+25% Incantation",
     trait3: "Deflect%",
     moveSpeed: 330,
     spirit1: {
@@ -1071,7 +1071,7 @@ export const heroes: Hero[] = [
       Energy: 6,
       Intelligence: 5,
     },
-    trait1: "Summon Powers DMG",
+    trait1: "+25% Summon",
     trait3: "Health",
     moveSpeed: 310,
     spirit1: {
@@ -1131,7 +1131,7 @@ export const heroes: Hero[] = [
       Energy: 6,
       Intelligence: 4,
     },
-    trait1: "Summon Powers DMG",
+    trait1: "+25% Summon",
     trait3: "Health On Hit",
     moveSpeed: 350,
     spirit1: {
@@ -1401,7 +1401,7 @@ export const heroes: Hero[] = [
       Energy: 5,
       Intelligence: 5,
     },
-    trait1: "Summon Powers DMG",
+    trait1: "+25% Summon",
     trait3: "Dodge%",
     moveSpeed: 330,
     spirit1: {
@@ -1764,7 +1764,7 @@ export const heroes: Hero[] = [
       Energy: 6,
       Intelligence: 4,
     },
-    trait1: "Summon Powers DMG",
+    trait1: "+25% Summon",
     trait3: "Projectile Reflect",
     moveSpeed: 310,
     spirit1: {
