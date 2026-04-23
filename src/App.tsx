@@ -1,16 +1,17 @@
 import "./App.css";
 import { Analytics } from "@vercel/analytics/react"
-import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { type Item, conditionLabels } from "./data/stats";
 import { type Hero, heroes } from "./data/heroes";
 import { calculateItemTotals, calculateFinalStats } from "./utils/statCalculate";
 import HeroSection from "./sections/HeroSection.tsx";
 import StatsSection from "./sections/StatsSection.tsx";
-import ItemsSection from "./sections/ItemsSection.tsx";
-import InfinitySection from "./sections/InfinitySection.tsx";
-import DamageSection from "./sections/DamageSection.tsx";
-import SynergySection from "./sections/SynergySection.tsx";
-import ModifierSection from "./sections/ModifierSection.tsx";
+
+const ItemsSection = lazy(() => import("./sections/ItemsSection.tsx"));
+const InfinitySection = lazy(() => import("./sections/InfinitySection.tsx"));
+const DamageSection = lazy(() => import("./sections/DamageSection.tsx"));
+const SynergySection = lazy(() => import("./sections/SynergySection.tsx"));
+const ModifierSection = lazy(() => import("./sections/ModifierSection.tsx"));
 
 const MODIFIER_SLOT1_PRIMARY = ["Physical", "Energy", "Mental"] as const;
 const DAMAGE_SECTION_UNIVERSAL_KEYWORDS = ["Physical", "Melee", "Energy", "Ranged", "Mental", "Area", "Summon", "Movement", "Signature"] as const;
@@ -544,51 +545,59 @@ export default function App() {
 
                             {/* Tab Content */}
                             <div>
-                                {activeTab === "items" && (
-                                    <ItemsSection items={items} setItems={setItems} selectedHero={selectedHero} />
-                                )}
-                                {activeTab === "infinity" && (
-                                    <InfinitySection
-                                        infinity={infinity}
-                                        setInfinity={setInfinity}
-                                        infinityAttributes={infinityAttributes}
-                                        setInfinityAttributes={setInfinityAttributes}
-                                        pointsRemaining={pointsRemaining}
-                                        setPointsRemaining={setPointsRemaining}
-                                        ranks={ranks}
-                                        setRanks={setRanks}
-                                        usedPerGem={usedPerGem}
-                                        setUsedPerGem={setUsedPerGem}
-                                    />
-                                )}
-                                {activeTab === "synergy" && (
-                                    <SynergySection
-                                        heroLevel={heroLevel}
-                                        synergy={synergy} setSynergy={setSynergy}
-                                        activatedHeroes={activatedHeroes} setActivatedHeroes={setActivatedHeroes} />
-                                )}
-                                {activeTab === "damage" && (
-                                    <DamageSection
-                                        hero={hero ?? heroes[0]}
-                                        finalStats={finalStats}
-                                        heroLevel={heroLevel}
-                                        heroKeywords={hero?.keywords ?? []}
-                                        damageCalculators={damageCalculators}
-                                        setDamageCalculators={setDamageCalculators}
-                                        globalCheckedConditions={globalCheckedConditions}
-                                        setGlobalCheckedConditions={setGlobalCheckedConditions}
-                                        vuln={vuln}
-                                        setVuln={setVuln}
-                                    />
-                                )}
-                                {activeTab === "modifiers" && (
-                                    <ModifierSection
-                                        selectedHero={selectedHero}
-                                        finalStats={finalStats}
-                                        chartTypeEnabled={modifierChartTypeEnabled}
-                                        onChartTypeEnabledChange={setModifierChartTypeEnabled}
-                                    />
-                                )}
+                                <Suspense
+                                    fallback={
+                                        <div className="py-6 text-center text-sky-200/90">
+                                            Loading…
+                                        </div>
+                                    }
+                                >
+                                    {activeTab === "items" && (
+                                        <ItemsSection items={items} setItems={setItems} selectedHero={selectedHero} />
+                                    )}
+                                    {activeTab === "infinity" && (
+                                        <InfinitySection
+                                            infinity={infinity}
+                                            setInfinity={setInfinity}
+                                            infinityAttributes={infinityAttributes}
+                                            setInfinityAttributes={setInfinityAttributes}
+                                            pointsRemaining={pointsRemaining}
+                                            setPointsRemaining={setPointsRemaining}
+                                            ranks={ranks}
+                                            setRanks={setRanks}
+                                            usedPerGem={usedPerGem}
+                                            setUsedPerGem={setUsedPerGem}
+                                        />
+                                    )}
+                                    {activeTab === "synergy" && (
+                                        <SynergySection
+                                            heroLevel={heroLevel}
+                                            synergy={synergy} setSynergy={setSynergy}
+                                            activatedHeroes={activatedHeroes} setActivatedHeroes={setActivatedHeroes} />
+                                    )}
+                                    {activeTab === "damage" && (
+                                        <DamageSection
+                                            hero={hero ?? heroes[0]}
+                                            finalStats={finalStats}
+                                            heroLevel={heroLevel}
+                                            heroKeywords={hero?.keywords ?? []}
+                                            damageCalculators={damageCalculators}
+                                            setDamageCalculators={setDamageCalculators}
+                                            globalCheckedConditions={globalCheckedConditions}
+                                            setGlobalCheckedConditions={setGlobalCheckedConditions}
+                                            vuln={vuln}
+                                            setVuln={setVuln}
+                                        />
+                                    )}
+                                    {activeTab === "modifiers" && (
+                                        <ModifierSection
+                                            selectedHero={selectedHero}
+                                            finalStats={finalStats}
+                                            chartTypeEnabled={modifierChartTypeEnabled}
+                                            onChartTypeEnabledChange={setModifierChartTypeEnabled}
+                                        />
+                                    )}
+                                </Suspense>
                             </div>
                         </section>
 
@@ -644,43 +653,51 @@ export default function App() {
 
                         {/* Tab Content - Mobile */}
                         <div className="mb-6">
-                            {activeTab === "items" && (
-                                <ItemsSection items={items} setItems={setItems} selectedHero={selectedHero} />
-                            )}
-                            {activeTab === "infinity" && (
-                                <InfinitySection
-                                    infinity={infinity}
-                                    setInfinity={setInfinity}
-                                    infinityAttributes={infinityAttributes}
-                                    setInfinityAttributes={setInfinityAttributes}
-                                    pointsRemaining={pointsRemaining}
-                                    setPointsRemaining={setPointsRemaining}
-                                    ranks={ranks}
-                                    setRanks={setRanks}
-                                    usedPerGem={usedPerGem}
-                                    setUsedPerGem={setUsedPerGem}
-                                />
-                            )}
-                            {activeTab === "synergy" && (
-                                <SynergySection
-                                    heroLevel={heroLevel}
-                                    synergy={synergy} setSynergy={setSynergy}
-                                    activatedHeroes={activatedHeroes} setActivatedHeroes={setActivatedHeroes} />
-                            )}
-                            {activeTab === "damage" && (
-                                <DamageSection
-                                    hero={hero ?? heroes[0]}
-                                    finalStats={finalStats}
-                                    heroLevel={heroLevel}
-                                    heroKeywords={hero?.keywords ?? []}
-                                    damageCalculators={damageCalculators}
-                                    setDamageCalculators={setDamageCalculators}
-                                    globalCheckedConditions={globalCheckedConditions}
-                                    setGlobalCheckedConditions={setGlobalCheckedConditions}
-                                    vuln={vuln}
-                                    setVuln={setVuln}
-                                />
-                            )}
+                            <Suspense
+                                fallback={
+                                    <div className="py-6 text-center text-sky-200/90">
+                                        Loading…
+                                    </div>
+                                }
+                            >
+                                {activeTab === "items" && (
+                                    <ItemsSection items={items} setItems={setItems} selectedHero={selectedHero} />
+                                )}
+                                {activeTab === "infinity" && (
+                                    <InfinitySection
+                                        infinity={infinity}
+                                        setInfinity={setInfinity}
+                                        infinityAttributes={infinityAttributes}
+                                        setInfinityAttributes={setInfinityAttributes}
+                                        pointsRemaining={pointsRemaining}
+                                        setPointsRemaining={setPointsRemaining}
+                                        ranks={ranks}
+                                        setRanks={setRanks}
+                                        usedPerGem={usedPerGem}
+                                        setUsedPerGem={setUsedPerGem}
+                                    />
+                                )}
+                                {activeTab === "synergy" && (
+                                    <SynergySection
+                                        heroLevel={heroLevel}
+                                        synergy={synergy} setSynergy={setSynergy}
+                                        activatedHeroes={activatedHeroes} setActivatedHeroes={setActivatedHeroes} />
+                                )}
+                                {activeTab === "damage" && (
+                                    <DamageSection
+                                        hero={hero ?? heroes[0]}
+                                        finalStats={finalStats}
+                                        heroLevel={heroLevel}
+                                        heroKeywords={hero?.keywords ?? []}
+                                        damageCalculators={damageCalculators}
+                                        setDamageCalculators={setDamageCalculators}
+                                        globalCheckedConditions={globalCheckedConditions}
+                                        setGlobalCheckedConditions={setGlobalCheckedConditions}
+                                        vuln={vuln}
+                                        setVuln={setVuln}
+                                    />
+                                )}
+                            </Suspense>
                         </div>
 
                         {/* Stats Section - Mobile */}
