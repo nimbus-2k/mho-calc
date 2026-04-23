@@ -184,7 +184,13 @@ export default function StatsSection({ selectedHero, finalStats, onSave, onLoad,
                                 if (!statConfig) return null;
                                 
                                 const statName = STAT_ID_TO_NAME_MAP[statConfig.id];
-                                const value = statName ? finalStats[statName] : 0;
+                                const baseValue = statName ? (finalStats[statName] ?? 0) : 0;
+                                const value =
+                                    statName === "Base DMG"
+                                        ? baseValue - 
+                                        (hero?.trait1 === "+25% Summon" || "+25% Incantation" ? 25 : 0) ||
+                                        (hero?.trait1 === "+30% Serum" ? 30 : 0)
+                                        : baseValue;
 
                                 return (
                                     <React.Fragment key={statConfig.id}>
