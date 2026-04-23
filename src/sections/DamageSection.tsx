@@ -413,7 +413,7 @@ export default function DamageSection({
                     </div>
                 </div>
             </div>
-            <div className="mt-3 text-indigo-200 text-xs bg-gray-800/95 rounded-lg border border-indigo-600 shadow-[0_10px_30px_rgba(0,0,0,0.35)] backdrop-blur-sm p-2.5 sticky bottom-3 z-20">
+            <div className="m-4 mt-3 text-indigo-200 text-xs bg-gray-800/95 rounded-lg border border-indigo-600 shadow-[0_10px_30px_rgba(0,0,0,0.35)] backdrop-blur-sm p-2.5 sticky bottom-3 z-20">
                 <div className="font-semibold text-indigo-100 mb-2">Damage Profile</div>
                 <div className="grid grid-cols-1 gap-2 mb-2">
                     <div className="rounded border border-amber-500/60 bg-gray-900/50 px-2 py-1.5">
