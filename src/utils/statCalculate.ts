@@ -219,10 +219,16 @@ export function calculateFinalStats(
     hero.trait1 === "Base Dmg 2% of Tenacity" ? (itemTotals["Tenacity"] ?? 0) * 0.02 : 0;
   const traitBaseDmgFromMissingHealthUnique =
     hero.trait1 === "Base Dmg 0.3% of Missing Health" ? maxHealth * 0.003 : 0;
+  const trait1BaseDmg1 =
+    hero.trait1 === "+25% Summon" || "+25% Incantation"  ? 25 : 0;
+  const trait1BaseDmg2 =
+    hero.trait1 === "+30% Serum" ? 30 : 0;
   const uniqueTraitBaseDmgBonus =
     traitBaseDmgFromSpiritUnique +
     traitBaseDmgFromTenacityUnique +
-    traitBaseDmgFromMissingHealthUnique;
+    traitBaseDmgFromMissingHealthUnique +
+    trait1BaseDmg1 +
+    trait1BaseDmg2;
   finalStats["Starting Base DMG"] =
     startingBaseDmg + trait1BaseDmgOfBnsHp + trait2BaseDmgOfSpirit + uniqueTraitBaseDmgBonus;
   finalStats["Base DMG"] =
@@ -281,7 +287,8 @@ export function calculateFinalStats(
     const dmgRatingVal = itemTotals[ratingKey] ?? 0;
     finalStats[ratingKey] = dmgRatingVal;
 
-    const addVal = (itemTotals[addKey] ?? 0) + (synergy[addKey] ?? 0);
+    const synergySummonBaseDmg = type3 === "Summon" ? (synergy["Summoned Ally DMG%"] ?? 0) : 0;
+    const addVal = (itemTotals[addKey] ?? 0) + (synergy[addKey] ?? 0) + synergySummonBaseDmg;
     finalStats[addKey] = addVal;
 
     const finalVal = dmgRatingVal / 40 + addVal;

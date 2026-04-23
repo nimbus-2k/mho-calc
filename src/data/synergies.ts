@@ -322,7 +322,7 @@ export const synergies: HeroSynergy[] = [
     name: "Rocket Raccoon",
     stats: [
       { key: "Summoned Ally DMG%", value: 5, type: "percent" },
-      { key: "Summoned Ally Health", value: 5, type: "percent" },
+      { key: "Summoned Ally DMG%", value: 5, type: "percent" },
     ],
   },
   {

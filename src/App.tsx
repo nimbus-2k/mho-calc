@@ -569,6 +569,7 @@ export default function App() {
                                 )}
                                 {activeTab === "damage" && (
                                     <DamageSection
+                                        hero={hero ?? heroes[0]}
                                         finalStats={finalStats}
                                         heroLevel={heroLevel}
                                         heroKeywords={hero?.keywords ?? []}
@@ -668,6 +669,7 @@ export default function App() {
                             )}
                             {activeTab === "damage" && (
                                 <DamageSection
+                                    hero={hero ?? heroes[0]}
                                     finalStats={finalStats}
                                     heroLevel={heroLevel}
                                     heroKeywords={hero?.keywords ?? []}

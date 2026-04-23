@@ -1,6 +1,8 @@
 import { conditionLabels } from "../data/stats";
+import { type Hero } from "../data/heroes";
 
 type DamageSectionProps = {
+    hero: Hero;
     finalStats: Record<string, number>;
     heroLevel: number;
     heroKeywords: string[];
@@ -19,6 +21,7 @@ type DamageCalculatorState = {
 }
 
 type DamageCalculationResult = {
+    hero: Hero;
     avgDmg: number;
     finalMin: number;
     finalMax: number;
@@ -76,6 +79,7 @@ const typeDmgKeys = [
 const DAMAGE_TYPE_TAGS = ["Physical", "Melee", "Energy", "Ranged", "Mental", "Area", "Summon", "Movement", "Signature"] as const;
 
 function calculateDamageValues({
+    hero,
     calculator,
     finalStats,
     heroLevel,
@@ -83,6 +87,7 @@ function calculateDamageValues({
     globalConditionBonusDmg,
     vuln,
 }: {
+    hero: Hero;
     calculator: DamageCalculatorState;
     finalStats: Record<string, number>;
     heroLevel: number;
@@ -138,6 +143,7 @@ function calculateDamageValues({
     const avgDmg = finalAvg * (pN * 1 + pC * (finalStats["Total Crit DMG%"] / 100) + pB * (finalStats["Total Brutal DMG%"] / 100));
 
     return {
+        hero,
         avgDmg,
         finalMin,
         finalMax,
@@ -150,6 +156,7 @@ function calculateDamageValues({
 
 function DamageCalculator({
     index,
+    hero,
     state,
     setState,
     finalStats,
@@ -160,6 +167,7 @@ function DamageCalculator({
     totalAvgDmg
 }: {
     index: number;
+    hero: Hero;
     state: DamageCalculatorState;
     setState: (state: DamageCalculatorState) => void;
     finalStats: Record<string, number>;
@@ -180,6 +188,7 @@ function DamageCalculator({
     );
 
     const { avgDmg, finalMin, finalMax, finalCritMin, finalCritMax, finalBrutalMin, finalBrutalMax } = calculateDamageValues({
+        hero,
         calculator: state,
         finalStats,
         heroLevel,
@@ -287,6 +296,7 @@ function DamageCalculator({
 }
 
 export default function DamageSection({
+    hero,
     finalStats,
     heroLevel,
     heroKeywords,
@@ -314,6 +324,7 @@ export default function DamageSection({
 
     // Calculate total average damage from all calculators
     const damageResults = damageCalculators.map((calculator) => calculateDamageValues({
+        hero,
         calculator,
         finalStats,
         heroLevel,
@@ -348,6 +359,7 @@ export default function DamageSection({
                             <DamageCalculator
                                 key={index}
                                 index={index}
+                                hero={hero}
                                 state={state}
                                 setState={(newState) => {
                                     const copy = [...damageCalculators];

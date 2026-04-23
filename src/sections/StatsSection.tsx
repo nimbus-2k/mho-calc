@@ -202,7 +202,9 @@ export default function StatsSection({ selectedHero, finalStats, onSave, onLoad,
                                     <React.Fragment key={bonusDmgStat.id}>
                                         <StatDisplay
                                             statConfig={bonusDmgStat}
-                                            value={finalStats[bonusDmgStat.name] ?? 0}
+                                            value={(finalStats[bonusDmgStat.name] ?? 0) +
+                                                (hero?.name === "Doctor Strange" ? 25 : 0) +
+                                                (hero?.name === "Captain America" ? 30 : 0)}
                                             hero={hero}
                                             isExpanded={expandState}
                                         />
