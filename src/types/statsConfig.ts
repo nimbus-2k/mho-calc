@@ -526,7 +526,7 @@ export const ALL_AVAILABLE_STATS: StatConfig[] = [
   },
   {
     id: "plus-crit-dmg",
-    name: "Crit DMG%",
+    name: "Crit DMG% (+)",
     tooltip: "Sources: Trait 1, Synergy, Infinity",
     format: "+{value}%",
     showWhenExpanded: true,
@@ -1137,7 +1137,7 @@ export const STAT_ID_TO_NAME_MAP: Record<string, string> = {
   "signature-base-dmg": "Signature Base DMG%",
   "total-signature-dmg": "Total Signature DMG%",
   "crit-dmg-rating": "Crit DMG Rating",
-  "plus-crit-dmg": "Crit DMG%",
+  "plus-crit-dmg": "Crit DMG% (+)",
   "total-crit-dmg": "Total Crit DMG%",
   "crit-hit-rating": "Crit Hit Rating",
   "crit-hit-multi": "Crit Hit Multi.",

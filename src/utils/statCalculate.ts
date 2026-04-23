@@ -435,11 +435,11 @@ export function calculateFinalStats(
   const synergyCritDmg = synergy["Crit DMG%"] ?? 0;
   const infinityCritDmg = infinity["Crit DMG%"] ?? 0;
   const plusCritDmg =
-    (itemTotals["Crit DMG%"] ?? 0) +
+    (itemTotals["Crit DMG% (+)"] ?? 0) +
     trait1CritDmg +
     synergyCritDmg +
     infinityCritDmg;
-  finalStats["Crit DMG%"] = plusCritDmg;
+  finalStats["Crit DMG% (+)"] = plusCritDmg;
   const totalCritDmg = 150 + (critDmgRating / heroLevel) * 0.75 + plusCritDmg;
   finalStats["Total Crit DMG%"] = totalCritDmg;
 
