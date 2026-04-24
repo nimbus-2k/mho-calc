@@ -17,6 +17,11 @@ const ModifierSection = lazy(() => import("./sections/ModifierSection.tsx"));
 const MODIFIER_SLOT1_PRIMARY = ["Physical", "Energy", "Mental"] as const;
 const DAMAGE_SECTION_UNIVERSAL_KEYWORDS = ["Physical", "Melee", "Energy", "Ranged", "Mental", "Area", "Summon", "Movement", "Signature"] as const;
 
+const STORAGE_KEYS = {
+    auto: "appState:auto",
+    manual: "appState:manual",
+} as const;
+
 function slot1LegendDefaultsForHero(heroName: string): Record<(typeof MODIFIER_SLOT1_PRIMARY)[number], boolean> {
     const hero = heroes.find((h) => h.name === heroName);
     const slot1Lower = new Set(MODIFIER_SLOT1_PRIMARY.map((t) => t.toLowerCase()));
@@ -125,6 +130,11 @@ export default function App() {
         (showToast as any)._tId = window.setTimeout(() => setToast({ message: "", visible: false }), 1500);
     };
 
+    // Auto-save
+    const hasHydratedRef = useRef(false);
+    const autoSaveTimerRef = useRef<number | null>(null);
+    const lastSavedSnapshotRef = useRef<string | null>(null);
+
     // Ref for info modal
     const infoModalRef = useRef<HTMLDivElement>(null);
     const notesModalRef = useRef<HTMLDivElement>(null);
@@ -136,10 +146,13 @@ export default function App() {
     );
 
     useEffect(() => {
-        loadState();
+        loadInitialState();
     }, []);
 
-
+    // Mark hydration complete after initial load attempt.
+    useEffect(() => {
+        hasHydratedRef.current = true;
+    }, []);
 
     // Handle click outside to close info modal
     useEffect(() => {
@@ -204,7 +217,7 @@ export default function App() {
         };
     }, [notesModalOpen]);
 
-    const saveState = () => {
+    const buildStateSnapshot = useCallback(() => {
         const stateToSave = {
             selectedHero,
             heroLevel,
@@ -222,24 +235,48 @@ export default function App() {
             globalCheckedConditions,
             vuln,
             modifierChartTypeEnabled,
+            activeTab,
         };
+        return stateToSave;
+    }, [
+        selectedHero,
+        heroLevel,
+        combatState,
+        heroAttributes,
+        infinityAttributes,
+        items,
+        infinity,
+        pointsRemaining,
+        ranks,
+        usedPerGem,
+        synergy,
+        activatedHeroes,
+        damageCalculators,
+        globalCheckedConditions,
+        vuln,
+        modifierChartTypeEnabled,
+        activeTab,
+    ]);
+
+    const saveState = (opts?: { silent?: boolean; target?: "auto" | "manual" }) => {
+        const stateToSave = buildStateSnapshot();
 
         try {
-            localStorage.setItem("appState", JSON.stringify(stateToSave));
+            const serialized = JSON.stringify(stateToSave);
+            const key = opts?.target === "manual" ? STORAGE_KEYS.manual : STORAGE_KEYS.auto;
+            localStorage.setItem(key, serialized);
+            if (key === STORAGE_KEYS.auto) lastSavedSnapshotRef.current = serialized;
             console.log("State saved successfully.");
-            showToast("Saved");
+            if (!opts?.silent) showToast("Saved");
         } catch (error) {
             console.error("Failed to save state:", error);
-            showToast("Save Failed");
+            if (!opts?.silent) showToast("Save Failed");
         }
     };
 
-    const loadState = () => {
+    const applyLoadedStateAndTrack = (serialized: string) => {
         try {
-            const savedState = localStorage.getItem("appState");
-            if (!savedState) return;
-
-            const parsedState = JSON.parse(savedState);
+            const parsedState = JSON.parse(serialized);
 
             if (parsedState.selectedHero) setSelectedHero(parsedState.selectedHero);
             if (parsedState.heroLevel) setHeroLevel(parsedState.heroLevel);
@@ -290,11 +327,33 @@ export default function App() {
                 }
                 setModifierChartTypeEnabled(raw);
             }
+            if (parsedState.activeTab) setActiveTab(parsedState.activeTab);
+            lastSavedSnapshotRef.current = serialized;
             console.log("State loaded successfully.");
             showToast("Loaded");
         } catch (error) {
             console.error("Failed to load state:", error);
             showToast("Load Failed");
+        }
+    };
+
+    const loadState = (source: "auto" | "manual") => {
+        const key = source === "manual" ? STORAGE_KEYS.manual : STORAGE_KEYS.auto;
+        const savedState = localStorage.getItem(key);
+        if (!savedState) return;
+        applyLoadedStateAndTrack(savedState);
+    };
+
+    const loadInitialState = () => {
+        // Prefer auto-save on startup, fallback to manual save.
+        const autoState = localStorage.getItem(STORAGE_KEYS.auto);
+        if (autoState) {
+            applyLoadedStateAndTrack(autoState);
+            return;
+        }
+        const manualState = localStorage.getItem(STORAGE_KEYS.manual);
+        if (manualState) {
+            applyLoadedStateAndTrack(manualState);
         }
     };
 
@@ -315,6 +374,7 @@ export default function App() {
         globalCheckedConditions,
         vuln,
         modifierChartTypeEnabled,
+        activeTab,
     });
 
     const applyLoadedState = (parsedState: any) => {
@@ -362,6 +422,7 @@ export default function App() {
             }
             setModifierChartTypeEnabled(raw);
         }
+        if (parsedState.activeTab) setActiveTab(parsedState.activeTab);
     };
 
     const exportStateToFile = () => {
@@ -388,13 +449,41 @@ export default function App() {
             const text = await file.text();
             const parsed = JSON.parse(text);
             applyLoadedState(parsed);
-            localStorage.setItem("appState", JSON.stringify(parsed));
+            const serialized = JSON.stringify(parsed);
+            localStorage.setItem(STORAGE_KEYS.manual, serialized);
+            localStorage.setItem(STORAGE_KEYS.auto, serialized);
+            lastSavedSnapshotRef.current = serialized;
             showToast("Imported");
         } catch (error) {
             console.error("Failed to import state:", error);
             showToast("Import Failed");
         }
     };
+
+    // Debounced auto-save on state changes (after initial hydration).
+    useEffect(() => {
+        if (!hasHydratedRef.current) return;
+
+        // Only save when snapshot actually changes.
+        let serialized: string;
+        try {
+            serialized = JSON.stringify(buildStateSnapshot());
+        } catch {
+            return;
+        }
+        if (lastSavedSnapshotRef.current === serialized) return;
+
+        if (autoSaveTimerRef.current != null) {
+            window.clearTimeout(autoSaveTimerRef.current);
+        }
+        autoSaveTimerRef.current = window.setTimeout(() => {
+            saveState({ silent: true, target: "auto" });
+        }, 750);
+
+        return () => {
+            if (autoSaveTimerRef.current != null) window.clearTimeout(autoSaveTimerRef.current);
+        };
+    }, [buildStateSnapshot]);
 
 
     return (
@@ -605,7 +694,7 @@ export default function App() {
 
                         {/* Stats */}
                         <StatsSection selectedHero={selectedHero}
-                            finalStats={finalStats} onSave={saveState} onLoad={loadState} onExportFile={exportStateToFile} onImportFile={importStateFromFile} />
+                            finalStats={finalStats} onSave={() => saveState({ target: "manual" })} onLoad={() => loadState("manual")} onExportFile={exportStateToFile} onImportFile={importStateFromFile} />
                     </div>
 
                     {/* Mobile/Tablet Layout */}
@@ -704,7 +793,7 @@ export default function App() {
 
                         {/* Stats Section - Mobile */}
                         <StatsSection selectedHero={selectedHero}
-                            finalStats={finalStats} onSave={saveState} onLoad={loadState} onExportFile={exportStateToFile} onImportFile={importStateFromFile} />
+                            finalStats={finalStats} onSave={() => saveState({ target: "manual" })} onLoad={() => loadState("manual")} onExportFile={exportStateToFile} onImportFile={importStateFromFile} />
                     </div>
                 </main >
             </div >
