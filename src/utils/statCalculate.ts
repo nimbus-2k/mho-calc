@@ -288,7 +288,7 @@ export function calculateFinalStats(
     finalStats[ratingKey] = dmgRatingVal;
 
     const synergySummonBaseDmg = type3 === "Summon" ? (synergy["Summoned Ally DMG%"] ?? 0) : 0;
-    const addVal = (itemTotals[addKey] ?? 0) + (synergy[addKey] ?? 0) + synergySummonBaseDmg;
+    const addVal = (itemTotals[addKey] ?? 0) + (type3 === "Signature" ? infinity[addKey] : 0) + (synergy[addKey] ?? 0) + synergySummonBaseDmg;
     finalStats[addKey] = addVal;
 
     const finalVal = dmgRatingVal / 40 + addVal;

@@ -120,7 +120,7 @@ export const gemStats: Record<string, StatConfig[]> = {
       format: "percent",
     },
     {
-      key: "Signature DMG%",
+      key: "Signature Base DMG%",
       label: "Base Damage to Signature Powers (+0.5%/1pt)",
       cost: 1,
       increment: 0.5,
