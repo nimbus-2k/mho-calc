@@ -7,10 +7,10 @@ Stat calculator for Marvel Heroes Omega. Game Version: 1.52.0.1700 (2.16a)
 ## How to Use
 
 1. **Select Your Hero**
-2. **Add Items and Stats** Item stats in-game are rounded to one decimal place, so they might not be exact. For better accuracy, calculate the exact stat percentages from the detailed item view (Alt view), then enter those values into the app.
+2. **Add Items and Stats** For accuracy, calculate the exact stat percentages from the detailed item view (Alt view), then enter those values into the app.
 3. **Allocate Infinity**
 4. **Activate Synergies**
-5. **Calculate Damage** The Base Damage should be without any items, buffs, talents, infinity, and synergy equipped/activated.
+5. **Calculate Damage** The Base Damage should be without items, buffs, talents, infinity, and synergy equipped/activated.
 
 ## Features
 
@@ -24,7 +24,7 @@ Stat calculator for Marvel Heroes Omega. Game Version: 1.52.0.1700 (2.16a)
 - **Select Stats to Display/Hide**
 - **Expandable Sections**
 
-### Damage Calculator (Non-Summoner)
+### Damage Calculator
 - **Normal, Crit, Brutal Damage**
 - **DMG vs [Condition]**
 - **Keyword System**
@@ -45,7 +45,7 @@ Stat calculator for Marvel Heroes Omega. Game Version: 1.52.0.1700 (2.16a)
 - **Attributes** (ONLY LVL 60 Base Attributes)
 
 #### Damage Stats
-- **Base Damage** (+Traits Ex: Deadpool - Bonus Damage based on Awesome)
+- **Base Damage** (with Unique Traits Ex: Deadpool's Bonus Damage from Awesome)
 - **Damage Types**
 - **Critical Hit/Damage**
 - **[Damage Type] Critical Hit**
@@ -66,7 +66,8 @@ Stat calculator for Marvel Heroes Omega. Game Version: 1.52.0.1700 (2.16a)
 - **[Damage Type] Brutal Strike**
 - **Average Effective Health**
 - **Toughness Stat**
-- **Traits with bonus stats**:
+- **Attribute Progression**
+- **Trait/Form with bonus stats**:
     - Emma Frost - Diamond Form
     - Hulk/She-hulk - Anger Scaling
     - Human Torch - Overheat

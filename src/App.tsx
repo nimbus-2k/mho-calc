@@ -559,20 +559,16 @@ export default function App() {
                             <h1 className="flex items-center justify-center">Notes</h1>
                             <h2>Changelog:</h2>
                             <ul className="list-disc pl-6">
-                                <li>
-                                    Replaced Avg DMG with DMG Score.
-                                        DMG Score calculates the expected average damage per hit by accounting for
-                                        normal, critical, and brutal hit probabilities and their respective damage values.
+                                <li>5/9/26 -
+                                    Replaced Avg DMG with DMG Score. Accounts for normal, critical, and brutal hit probabilities.
                                 </li>
                             </ul>
                             <h2>To-Add: </h2>
                             <ul className="list-disc pl-6">
                                 <li> Toughness Stat (Item Section)</li>
                                 <li> Attribute Level Progression (Hero Section)</li>
-                                <li> Blessings (Item Section)</li>
-                                <li> Summoned Ally Stats</li>
                                 <li> Avg. Effective Health</li>
-                                <li> [Type] Brutal Strike (ex. Betty Ross' BigAss Sword)</li>
+                                <li> [Damage Type] Brutal Strike (ex. Betty Ross' BigAss Sword)</li>
                             </ul>
                         </div>
                     </div>

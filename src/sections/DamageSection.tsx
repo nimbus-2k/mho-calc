@@ -290,7 +290,7 @@ function DamageCalculator({
                 </span>
             </div>
             <div className="text-center text-[11px] text-indigo-300 mt-1">
-                Share of total: <span className="font-semibold text-indigo-200">{damageSharePct.toFixed(1)}%</span>
+                Share of Total: <span className="font-semibold text-indigo-200">{damageSharePct.toFixed(1)}%</span>
             </div>
         </div>
     );
