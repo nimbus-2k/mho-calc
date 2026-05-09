@@ -119,15 +119,14 @@ function calculateDamageValues({
         .filter((keyword): keyword is string => !!keyword)
         .map((keyword) => finalStats[`${keyword} Bonus DMG%`] ?? 0)
         .reduce((a, b) => a + b, 0);
-    const heroKeywordMultiplier = 1 + heroKeywordBonusDmg / 100;
 
     const totalDmgBonus = finalStats["Base DMG"] + summedKeywordDmgDelta + globalConditionBonusDmg;
 
     const startingMin = baseMin / (1 + finalStats["Starting Base DMG"] / 100);
     const startingMax = baseMax / (1 + finalStats["Starting Base DMG"] / 100);
 
-    const finalMin = (startingMin * (1 + totalDmgBonus / 100) * (1 + (vuln / 100))) * (heroKeywordMultiplier);
-    const finalMax = (startingMax * (1 + totalDmgBonus / 100) * (1 + (vuln / 100))) * (heroKeywordMultiplier);
+    const finalMin = (startingMin * (1 + totalDmgBonus / 100)) * (1 + (vuln / 100)) * (1 + heroKeywordBonusDmg / 100);
+    const finalMax = (startingMax * (1 + totalDmgBonus / 100)) * (1 + (vuln / 100)) * (1 + heroKeywordBonusDmg / 100);
     const finalAvg = (finalMin + finalMax) / 2;
 
     const finalCritMin = finalMin * (finalStats["Total Crit DMG%"] / 100);
@@ -428,7 +427,6 @@ export default function DamageSection({
                 </div>
             </div>
             <div className="m-4 mt-3 text-indigo-200 text-xs bg-gray-800/95 rounded-lg border border-indigo-600 shadow-[0_10px_30px_rgba(0,0,0,0.35)] backdrop-blur-sm p-2.5 sticky bottom-3 z-20">
-                <div className="font-semibold text-indigo-100 mb-2">Damage Profile</div>
                 <div className="grid grid-cols-1 gap-2 mb-2">
                     <div className="rounded border border-amber-500/60 bg-gray-900/50 px-2 py-1.5">
                         <div className="text-[10px] text-amber-300 uppercase tracking-wide">Total DMG Score</div>

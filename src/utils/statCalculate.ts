@@ -220,7 +220,7 @@ export function calculateFinalStats(
   const traitBaseDmgFromMissingHealthUnique =
     hero.trait1 === "Base Dmg 0.3% of Missing Health" ? maxHealth * 0.003 : 0;
   const trait1BaseDmg1 =
-    hero.trait1 === "+25% Summon" || "+25% Incantation"  ? 25 : 0;
+    hero.trait1 === "+25% Summon" || hero.trait1 === "+25% Incantation"  ? 25 : 0;
   const trait1BaseDmg2 =
     hero.trait1 === "+30% Serum" ? 30 : 0;
   const uniqueTraitBaseDmgBonus =
