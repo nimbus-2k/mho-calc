@@ -6,8 +6,8 @@ type DamageSectionProps = {
     finalStats: Record<string, number>;
     heroLevel: number;
     heroKeywords: string[];
-    damageCalculators: Array<{ baseMin: number; baseMax: number; keywords?: string[] }>;
-    setDamageCalculators: (calculators: Array<{ baseMin: number; baseMax: number; keywords?: string[] }>) => void;
+    damageCalculators: Array<{ baseMin: number; baseMax: number; indivBonusDmg: number; keywords?: string[] }>;
+    setDamageCalculators: (calculators: Array<{ baseMin: number; baseMax: number; indivBonusDmg: number; keywords?: string[] }>) => void;
     globalCheckedConditions: boolean[];
     setGlobalCheckedConditions: (conditions: boolean[]) => void;
     vuln: number;
@@ -17,6 +17,7 @@ type DamageSectionProps = {
 type DamageCalculatorState = {
     baseMin: number;
     baseMax: number;
+    indivBonusDmg: number;
     keywords?: string[];
 }
 
@@ -95,7 +96,7 @@ function calculateDamageValues({
     globalConditionBonusDmg: number;
     vuln: number;
 }): DamageCalculationResult {
-    const { baseMin, baseMax } = calculator;
+    const { baseMin, baseMax, indivBonusDmg } = calculator;
     const selectedKeywords = calculator.keywords ?? [];
 
     const summedKeywordCritDelta = selectedKeywords
@@ -125,8 +126,8 @@ function calculateDamageValues({
     const startingMin = baseMin / (1 + finalStats["Starting Base DMG"] / 100);
     const startingMax = baseMax / (1 + finalStats["Starting Base DMG"] / 100);
 
-    const finalMin = (startingMin * (1 + totalDmgBonus / 100)) * (1 + (vuln / 100)) * (1 + heroKeywordBonusDmg / 100);
-    const finalMax = (startingMax * (1 + totalDmgBonus / 100)) * (1 + (vuln / 100)) * (1 + heroKeywordBonusDmg / 100);
+    const finalMin = ((startingMin * (1 + totalDmgBonus / 100)) * (1 + (vuln / 100)) * (1 + heroKeywordBonusDmg / 100)) * (1 + (indivBonusDmg ?? 0) / 100);
+    const finalMax = ((startingMax * (1 + totalDmgBonus / 100)) * (1 + (vuln / 100)) * (1 + heroKeywordBonusDmg / 100)) * (1 + (indivBonusDmg ?? 0) / 100);
     const finalAvg = (finalMin + finalMax) / 2;
 
     const finalCritMin = finalMin * (finalStats["Total Crit DMG%"] / 100);
@@ -178,7 +179,7 @@ function DamageCalculator({
     vuln: number;
     totalDmgScore: number;
 }) {
-    const { baseMin, baseMax } = state;
+    const { baseMin, baseMax, indivBonusDmg } = state;
     const selectedKeywords = state.keywords ?? [];
     const heroKeywordByLower = new Map(
         heroKeywords.map((keyword) => [keyword.toLowerCase(), keyword])
@@ -227,6 +228,22 @@ function DamageCalculator({
                         onFocus={(e) => e.target.select()}
                         placeholder="Max"
                     />
+                    <label className="text-xs font-semibold text-blue-200 mt-2 mb-1">Bonus DMG%</label>
+                    <div className="relative w-full">
+                        <input
+                            type="number"
+                            className="bg-gray-600 border border-blue-500 rounded px-2 py-1 pr-6 text-white text-xs w-full focus:ring-blue-400 focus:outline-none"
+                            value={indivBonusDmg}
+                            min={0}
+                            onChange={e => setState({ ...state, indivBonusDmg: Number(e.target.value) })}
+                            onFocus={(e) => e.target.select()}
+                            placeholder="Bonus DMG"
+                        />
+
+                        <span className="absolute inset-y-0 right-2 flex items-center text-gray-400 text-xs pointer-events-none">
+                            %
+                        </span>
+                    </div>
                 </div>
                 {/* Keywords Card */}
                 <div className="col-span-1 flex flex-col bg-gray-700 rounded p-2 border border-indigo-600">

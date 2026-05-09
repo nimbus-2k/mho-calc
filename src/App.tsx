@@ -64,11 +64,11 @@ export default function App() {
     const [activatedHeroes, setActivatedHeroes] = useState<string[]>([]);
 
     // Damage Section
-    const [damageCalculators, setDamageCalculators] = useState<Array<{ baseMin: number; baseMax: number; keywords?: string[] }>>(() =>
+    const [damageCalculators, setDamageCalculators] = useState<Array<{ baseMin: number; baseMax: number; indivBonusDmg: number; keywords?: string[] }>>(() =>
         Array(8).fill(null).map(() => ({
             baseMin: 0,
             baseMax: 0,
-            attackSpeed: 1,
+            indivBonusDmg: 0,
             keywords: [],
         }))
     );
@@ -302,17 +302,17 @@ export default function App() {
                 const converted = parsedState.damageCalculators.map((c: any) => {
                     // New shape already present
                     if (c.baseMin !== undefined && c.baseMax !== undefined) {
-                        return { baseMin: c.baseMin, baseMax: c.baseMax, attackSpeed: c.attackSpeed ?? 1, keywords: c.keywords ?? c.tags ?? [] };
+                        return { baseMin: c.baseMin, baseMax: c.baseMax, indivBonusDmg: c.indivBonusDmg ?? 0, keywords: c.keywords ?? c.tags ?? [] };
                     }
                     // Previous step: only baseMax existed
                     if (c.baseMax !== undefined && c.baseMin === undefined) {
-                        return { baseMin: Number(c.baseMax) / 1.5, baseMax: c.baseMax, attackSpeed: c.attackSpeed ?? 1, keywords: c.keywords ?? c.tags ?? [] };
+                        return { baseMin: Number(c.baseMax) / 1.5, baseMax: c.baseMax, indivBonusDmg: c.indivBonusDmg ?? 0, keywords: c.keywords ?? c.tags ?? [] };
                     }
                     // Oldest: only baseMin existed
                     if (c.baseMin !== undefined && c.baseMax === undefined) {
-                        return { baseMin: c.baseMin, baseMax: Number(c.baseMin) * 1.5, attackSpeed: c.attackSpeed ?? 1, keywords: c.keywords ?? c.tags ?? [] };
+                        return { baseMin: c.baseMin, baseMax: Number(c.baseMin) * 1.5, indivBonusDmg: c.indivBonusDmg ?? 0, keywords: c.keywords ?? c.tags ?? [] };
                     }
-                    return { baseMin: 0, baseMax: 0, attackSpeed: c.attackSpeed ?? 1, keywords: [] };
+                    return { baseMin: 0, baseMax: 0, indivBonusDmg: 0, keywords: [] };
                 });
                 setDamageCalculators(converted);
             }
@@ -399,15 +399,15 @@ export default function App() {
         if (parsedState.damageCalculators && parsedState.damageCalculators.length) {
             const converted = parsedState.damageCalculators.map((c: any) => {
                 if (c.baseMin !== undefined && c.baseMax !== undefined) {
-                    return { baseMin: c.baseMin, baseMax: c.baseMax, attackSpeed: c.attackSpeed ?? 1, keywords: c.keywords ?? c.tags ?? [] };
+                    return { baseMin: c.baseMin, baseMax: c.baseMax, indivBonusDmg: c.indivBonusDmg ?? 0, keywords: c.keywords ?? c.tags ?? [] };
                 }
                 if (c.baseMax !== undefined && c.baseMin === undefined) {
-                    return { baseMin: Number(c.baseMax) / 1.5, baseMax: c.baseMax, attackSpeed: c.attackSpeed ?? 1, keywords: c.keywords ?? c.tags ?? [] };
+                    return { baseMin: Number(c.baseMax) / 1.5, baseMax: c.baseMax, indivBonusDmg: c.indivBonusDmg ?? 0, keywords: c.keywords ?? c.tags ?? [] };
                 }
                 if (c.baseMin !== undefined && c.baseMax === undefined) {
-                    return { baseMin: c.baseMin, baseMax: Number(c.baseMin) * 1.5, attackSpeed: c.attackSpeed ?? 1, keywords: c.keywords ?? c.tags ?? [] };
+                    return { baseMin: c.baseMin, baseMax: Number(c.baseMin) * 1.5, indivBonusDmg: 0, keywords: c.keywords ?? c.tags ?? [] };
                 }
-                return { baseMin: 0, baseMax: 0, attackSpeed: c.attackSpeed ?? 1, keywords: [] };
+                return { baseMin: 0, baseMax: 0, indivBonusDmg: 0, keywords: [] };
             });
             setDamageCalculators(converted);
         }
@@ -642,7 +642,7 @@ export default function App() {
                             <div>
                                 <Suspense
                                     fallback={
-                                        <div className="py-6 text-center text-sky-200/90">
+                                        <div className="p-6 text-center text-sky-200/90">
                                             Loading…
                                         </div>
                                     }
@@ -739,6 +739,12 @@ export default function App() {
                                 Synergy
                             </button>
                             <button
+                                onClick={() => setActiveTab("modifiers")}
+                                className={`px-3 py-2 transition-colors duration-200 rounded-lg text-xs font-semibold ${activeTab === "modifiers" ? "bg-blue-700/90 text-white shadow" : "text-sky-200 hover:bg-blue-800/60 hover:text-white"}`}
+                            >
+                                Modifiers
+                            </button>
+                            <button
                                 onClick={() => setActiveTab("damage")}
                                 className={`px-3 py-2 transition-colors duration-200 rounded-lg text-xs font-semibold ${activeTab === "damage" ? "bg-blue-700/90 text-white shadow" : "text-sky-200 hover:bg-blue-800/60 hover:text-white"}`}
                             >
@@ -750,7 +756,7 @@ export default function App() {
                         <div className="mb-6">
                             <Suspense
                                 fallback={
-                                    <div className="py-6 text-center text-sky-200/90">
+                                    <div className="p-6 text-center text-sky-200/90">
                                         Loading…
                                     </div>
                                 }
@@ -790,6 +796,14 @@ export default function App() {
                                         setGlobalCheckedConditions={setGlobalCheckedConditions}
                                         vuln={vuln}
                                         setVuln={setVuln}
+                                    />
+                                )}
+                                {activeTab === "modifiers" && (
+                                    <ModifierSection
+                                        selectedHero={selectedHero}
+                                        finalStats={finalStats}
+                                        chartTypeEnabled={modifierChartTypeEnabled}
+                                        onChartTypeEnabledChange={setModifierChartTypeEnabled}
                                     />
                                 )}
                             </Suspense>
