@@ -22,7 +22,7 @@ type DamageCalculatorState = {
 
 type DamageCalculationResult = {
     hero: Hero;
-    avgDmg: number;
+    dmgScore: number;
     finalMin: number;
     finalMax: number;
     finalCritMin: number;
@@ -132,19 +132,21 @@ function calculateDamageValues({
 
     const finalCritMin = finalMin * (finalStats["Total Crit DMG%"] / 100);
     const finalCritMax = finalMax * (finalStats["Total Crit DMG%"] / 100);
+    const finalCritAvg = finalAvg * (finalStats["Total Crit DMG%"] / 100);
 
     const finalBrutalMin = finalMin * (finalStats["Total Brutal DMG%"] / 100);
     const finalBrutalMax = finalMax * (finalStats["Total Brutal DMG%"] / 100);
+    const finalBrutalAvg = finalAvg * (finalStats["Total Crit DMG%"] / 100) * (finalStats["Total Brutal DMG%"] / 100);
 
     const pN = 1 - applicableCritHitPct;
     const pC = applicableCritHitPct * (1 - applicableBrutalStrikePct);
     const pB = applicableCritHitPct * applicableBrutalStrikePct;
 
-    const avgDmg = finalAvg * (pN * 1 + pC * (finalStats["Total Crit DMG%"] / 100) + pB * (finalStats["Total Brutal DMG%"] / 100));
+    const dmgScore = (pN * finalAvg) + (pC * finalCritAvg) + (pB * finalBrutalAvg);
 
     return {
         hero,
-        avgDmg,
+        dmgScore,
         finalMin,
         finalMax,
         finalCritMin,
@@ -164,7 +166,7 @@ function DamageCalculator({
     heroKeywords,
     globalConditionBonusDmg,
     vuln,
-    totalAvgDmg
+    totalDmgScore
 }: {
     index: number;
     hero: Hero;
@@ -175,7 +177,7 @@ function DamageCalculator({
     heroKeywords: string[];
     globalConditionBonusDmg: number;
     vuln: number;
-    totalAvgDmg: number;
+    totalDmgScore: number;
 }) {
     const { baseMin, baseMax } = state;
     const selectedKeywords = state.keywords ?? [];
@@ -187,7 +189,7 @@ function DamageCalculator({
             arr.findIndex((k) => k.toLowerCase() === keyword.toLowerCase()) === index
     );
 
-    const { avgDmg, finalMin, finalMax, finalCritMin, finalCritMax, finalBrutalMin, finalBrutalMax } = calculateDamageValues({
+    const { dmgScore, finalMin, finalMax, finalCritMin, finalCritMax, finalBrutalMin, finalBrutalMax } = calculateDamageValues({
         hero,
         calculator: state,
         finalStats,
@@ -196,7 +198,7 @@ function DamageCalculator({
         globalConditionBonusDmg,
         vuln,
     });
-    const damageSharePct = totalAvgDmg > 0 ? (avgDmg / totalAvgDmg) * 100 : 0;
+    const damageSharePct = totalDmgScore > 0 ? (dmgScore / totalDmgScore) * 100 : 0;
 
     return (
         <div className="bg-gray-800 rounded-lg p-3 border border-gray-700">
@@ -284,8 +286,8 @@ function DamageCalculator({
             </div>
 
             <div className="border border-amber-500 rounded-lg text-center text-amber-500 text-sm">
-                <span className="font-semibold">Avg Dmg: {" "}
-                    <span className="font-bold">{formatIntegerWithCommas(avgDmg)}</span>
+                <span className="font-semibold">DMG Score: {" "}
+                    <span className="font-bold">{formatIntegerWithCommas(dmgScore)}</span>
                 </span>
             </div>
             <div className="text-center text-[11px] text-indigo-300 mt-1">
@@ -332,14 +334,14 @@ export default function DamageSection({
         globalConditionBonusDmg,
         vuln,
     }));
-    const totalAvgDmg = damageResults.reduce((total, result) => total + result.avgDmg, 0);
+    const totalDmgScore = damageResults.reduce((total, result) => total + result.dmgScore, 0);
     const damageProfileByKeywordCombo = damageCalculators.reduce((acc, calculator, idx) => {
         const comboKey = (calculator.keywords ?? [])
             .map((k) => k.trim())
             .filter((k) => k.length > 0)
             .join(" / ") || "No Keywords";
         const prev = acc.get(comboKey) ?? 0;
-        acc.set(comboKey, prev + damageResults[idx].avgDmg);
+        acc.set(comboKey, prev + damageResults[idx].dmgScore);
         return acc;
     }, new Map<string, number>());
     const sortedDamageProfileEntries = Array.from(damageProfileByKeywordCombo.entries())
@@ -371,7 +373,7 @@ export default function DamageSection({
                                 heroKeywords={heroKeywords}
                                 globalConditionBonusDmg={globalConditionBonusDmg}
                                 vuln={vuln}
-                                totalAvgDmg={totalAvgDmg}
+                                totalDmgScore={totalDmgScore}
                             />
                         ))}
                     </div>
@@ -429,14 +431,14 @@ export default function DamageSection({
                 <div className="font-semibold text-indigo-100 mb-2">Damage Profile</div>
                 <div className="grid grid-cols-1 gap-2 mb-2">
                     <div className="rounded border border-amber-500/60 bg-gray-900/50 px-2 py-1.5">
-                        <div className="text-[10px] text-amber-300 uppercase tracking-wide">Total Avg Dmg</div>
-                        <div className="text-sm font-bold text-amber-200">{formatIntegerWithCommas(totalAvgDmg)}</div>
+                        <div className="text-[10px] text-amber-300 uppercase tracking-wide">Total DMG Score</div>
+                        <div className="text-sm font-bold text-amber-200">{formatIntegerWithCommas(totalDmgScore)}</div>
                     </div>
                 </div>
                 <div className="text-[10px] text-gray-400 uppercase tracking-wide mb-1">Contribution by keyword combo</div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                    {sortedDamageProfileEntries.map(([comboLabel, comboAvgDmg]) => {
-                        const sharePct = totalAvgDmg > 0 ? (comboAvgDmg / totalAvgDmg) * 100 : 0;
+                    {sortedDamageProfileEntries.map(([comboLabel, comboDmgScore]) => {
+                        const sharePct = totalDmgScore > 0 ? (comboDmgScore / totalDmgScore) * 100 : 0;
                         return (
                             <div key={`share-${comboLabel}`} className="flex items-center justify-between gap-2 px-2 py-1 rounded border border-gray-700/70 bg-gray-900/30">
                                 <span className="truncate text-[11px]">{comboLabel}</span>

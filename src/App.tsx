@@ -557,6 +557,14 @@ export default function App() {
                         </button>
                         <div className="mb-4 text-xs">
                             <h1 className="flex items-center justify-center">Notes</h1>
+                            <h2>Changelog:</h2>
+                            <ul className="list-disc pl-6">
+                                <li>
+                                    Replaced Avg DMG with DMG Score.
+                                        DMG Score calculates the expected average damage per hit by accounting for
+                                        normal, critical, and brutal hit probabilities and their respective damage values.
+                                </li>
+                            </ul>
                             <h2>To-Add: </h2>
                             <ul className="list-disc pl-6">
                                 <li> Toughness Stat (Item Section)</li>
